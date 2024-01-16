@@ -10,9 +10,9 @@ import java.util.Collection;
  */
 public class ChessPiece {
     private ChessGame.TeamColor color;
-    private ChessPiece.PieceType type;
+    private PieceType type;
 
-    public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
+    public ChessPiece(ChessGame.TeamColor pieceColor, PieceType type) {
         this.color = pieceColor;
         this.type = type;
     }
@@ -51,6 +51,53 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        throw new RuntimeException("Not implemented");
+//        Initialize a collection of the moves
+        Collection<ChessMove> valid_moves = null;
+
+//        Determine the type of piece to know how to move
+        ChessPiece piece = board.getPiece(myPosition);
+
+//        Store the row and column
+        int row = myPosition.getRow();
+        int col = myPosition.getColumn();
+
+//        PAWN
+        if (piece.getPieceType() == PieceType.PAWN) {
+
+//            Get the color to find direction of movement
+            int dir = 1;
+            if (piece.getTeamColor() == ChessGame.TeamColor.BLACK) {
+                dir = -1;
+            }
+
+//            Check if the pawn can move forwards (must be empty)
+            ChessPosition newPosition = new ChessPosition(row+dir, col);
+            if (board.getPiece(newPosition) == null) {
+                valid_moves.add(new ChessMove(myPosition, newPosition, null));
+            }
+
+//            Check if the pawn can KO a piece diagonal to it on one direction
+            newPosition = new ChessPosition(row+dir, col+1);
+            if (board.getPiece(newPosition).getTeamColor() != piece.getTeamColor()) {
+                valid_moves.add(new ChessMove(myPosition, newPosition, null));
+            }
+
+//            Check if the pawn can KO a piece diagonal to it on the other direction
+            newPosition = new ChessPosition(row+dir, col-1);
+            if (board.getPiece(newPosition).getTeamColor() != piece.getTeamColor()) {
+                valid_moves.add(new ChessMove(myPosition, newPosition, null));
+            }
+        }
+
+//        BISHOP
+        if (piece.getPieceType() == PieceType.BISHOP) {
+            int endRow = row;
+            int endCol = col;
+
+
+
+        }
+
+        return valid_moves;
     }
 }
