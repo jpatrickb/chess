@@ -1,6 +1,7 @@
 package chess;
 
 import java.util.Collection;
+import java.util.Vector;
 
 /**
  * Represents a single chess piece
@@ -52,7 +53,7 @@ public class ChessPiece {
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
 //        Initialize a collection of the moves
-        Collection<ChessMove> valid_moves = null;
+        Collection<ChessMove> valid_moves = new Vector<ChessMove>(0);
 
 //        Determine the type of piece to know how to move
         ChessPiece piece = board.getPiece(myPosition);
@@ -93,8 +94,21 @@ public class ChessPiece {
         if (piece.getPieceType() == PieceType.BISHOP) {
             int endRow = row;
             int endCol = col;
+            ChessPosition newPosition;
 
-
+            int[] dirs = {-1, 1};
+            for (var up : dirs){
+                for (var side : dirs) {
+                    newPosition = new ChessPosition(row + up, col + side);
+                    if (board.getPiece(newPosition) == null) {
+                        valid_moves.add(new ChessMove(myPosition, newPosition, null));
+                    } else if (board.getPiece(newPosition).getTeamColor() != piece.getTeamColor()) {
+                        valid_moves.add(new ChessMove(myPosition, newPosition, null));
+                    } else {
+                            break;
+                    }
+                }
+            }
 
         }
 
