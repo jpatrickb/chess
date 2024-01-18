@@ -1,6 +1,7 @@
 package chess;
 
 import java.util.Collection;
+import java.util.Objects;
 import java.util.Vector;
 
 /**
@@ -99,10 +100,9 @@ public class ChessPiece {
             int[] dirs = {-1, 1};
             for (var up : dirs){
                 for (var side : dirs) {
+
                     newPosition = new ChessPosition(row + up, col + side);
-                    if (board.getPiece(newPosition) == null) {
-                        valid_moves.add(new ChessMove(myPosition, newPosition, null));
-                    } else if (board.getPiece(newPosition).getTeamColor() != piece.getTeamColor()) {
+                    if (board.getPiece(newPosition) == null || board.getPiece(newPosition).getTeamColor() != piece.getTeamColor()) {
                         valid_moves.add(new ChessMove(myPosition, newPosition, null));
                     } else {
                             break;
@@ -113,5 +113,18 @@ public class ChessPiece {
         }
 
         return valid_moves;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ChessPiece that = (ChessPiece) o;
+        return color == that.color && type == that.type;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(color, type);
     }
 }
