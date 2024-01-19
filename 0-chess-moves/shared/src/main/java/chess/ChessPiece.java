@@ -64,6 +64,11 @@ public class ChessPiece {
         int row = myPosition.getRow();
         int col = myPosition.getColumn();
 
+        int endRow;
+        int endCol;
+
+        ChessPosition newPosition;
+
 //        PAWN
         if (piece.getPieceType() == PieceType.PAWN) {
 
@@ -74,7 +79,7 @@ public class ChessPiece {
             }
 
 //            Check if the pawn can move forwards (must be empty)
-            ChessPosition newPosition = new ChessPosition(row+dir, col);
+            newPosition = new ChessPosition(row+dir, col);
             if (board.getPiece(newPosition) == null) {
                 valid_moves.add(new ChessMove(myPosition, newPosition, null));
             }
@@ -94,22 +99,30 @@ public class ChessPiece {
 
 //        BISHOP
         else if (piece.getPieceType() == PieceType.BISHOP) {
-            ChessPosition newPosition;
-
             int[] dirs = {-1, 1};
             for (var up : dirs){
                 for (var side : dirs) {
                     for (int i=1; i < 8; i++) {
                         newPosition = new ChessPosition(row + up*i, col + side*i);
+
+//                        In bounds?
                         if (row + up*i > 8 || row + up*i < 1 || col + side*i > 8 || col + side*i < 1) {
                             break;
                         }
+
+//                        Empty?
                         if (board.getPiece(newPosition) == null) {
                             valid_moves.add(new ChessMove(myPosition, newPosition, null));
-                        } else if (board.getPiece(newPosition).getTeamColor() != piece.getTeamColor()) {
+                        }
+
+//                        Can steal?
+                        else if (board.getPiece(newPosition).getTeamColor() != piece.getTeamColor()) {
                             valid_moves.add(new ChessMove(myPosition, newPosition, null));
                             break;
-                        } else {
+                        }
+
+//                        Can't go there?
+                        else {
                             break;
                         }
                     }
@@ -121,10 +134,6 @@ public class ChessPiece {
 
 //        KING
         else if (piece.getPieceType() == PieceType.KING) {
-            int endRow;
-            int endCol;
-            ChessPosition newPosition;
-
             int[] dirs = {-1, 0, 1};
             for (var up : dirs) {
                 for (var side : dirs) {
@@ -141,6 +150,84 @@ public class ChessPiece {
                     }
                 }
             }
+        }
+
+//        ROOK
+        else if (piece.getPieceType() == PieceType.ROOK) {
+            int[] dirs = {-1, 1};
+            for (var dir : dirs) {
+//                Check vertical direction
+                for (int i=1; i < 8; i++) {
+                    endRow = row + i * dir;
+                    if (endRow > 8 || endRow < 1) {
+                        break;
+                    }
+                    newPosition = new ChessPosition(endRow, col);
+                    if (board.getPiece(newPosition) == null) {
+                        valid_moves.add(new ChessMove(myPosition, newPosition, null));
+                    } else if (board.getPiece(newPosition).getTeamColor() != piece.getTeamColor()) {
+                        valid_moves.add(new ChessMove(myPosition, newPosition, null));
+                        break;
+                    } else {
+                        break;
+                    }
+                }
+
+//                Check horizontal direction
+                for (int i=1; i < 8; i++) {
+                    endCol = col + i * dir;
+                    if (endCol > 8 || endCol < 1) {
+                        break;
+                    }
+
+                    newPosition = new ChessPosition(row, endCol);
+
+                    if (board.getPiece(newPosition) == null) {
+                        valid_moves.add(new ChessMove(myPosition, newPosition, null));
+                    } else if (board.getPiece(newPosition).getTeamColor() != piece.getTeamColor()) {
+                        valid_moves.add(new ChessMove(myPosition, newPosition, null));
+                        break;
+                    } else {
+                        break;
+                    }
+                }
+            }
+        }
+
+
+//        KNIGHT
+        else if (piece.getPieceType() == PieceType.KNIGHT) {
+            int[] dirs = {-1, 1};
+
+            for (var dir_r : dirs) {
+                for (var dir_c : dirs) {
+                    endRow = row + 2*dir_r;
+                    endCol = col + dir_c;
+
+                    if (!(endRow > 8 || endRow < 1 || endCol > 8 || endCol < 1)) {
+                        newPosition = new ChessPosition(endRow, endCol);
+
+                        if (board.getPiece(newPosition) == null || board.getPiece(newPosition).getTeamColor() != piece.getTeamColor()) {
+                            valid_moves.add(new ChessMove(myPosition, newPosition, null));
+                        }
+                    }
+
+
+
+                    endRow = row + dir_c;
+                    endCol = col + 2*dir_r;
+
+                    if (!(endRow > 8 || endRow < 1 || endCol > 8 || endCol < 1)) {
+                        newPosition = new ChessPosition(endRow, endCol);
+
+                        if (board.getPiece(newPosition) == null || board.getPiece(newPosition).getTeamColor() != piece.getTeamColor()) {
+                            valid_moves.add(new ChessMove(myPosition, newPosition, null));
+                        }
+                    }
+
+                }
+            }
+
         }
 
         return valid_moves;
