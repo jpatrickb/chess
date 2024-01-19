@@ -64,7 +64,9 @@ public class TestFactory {
         var testPiece = board.getPiece(startPosition);
         var validMoves = loadMoves(startPosition, endPositions);
 
-        Assertions.assertEquals(validMoves, testPiece.pieceMoves(board, startPosition), "Wrong moves");
+        var testMoves = testPiece.pieceMoves(board, startPosition);
+
+        Assertions.assertEquals(validMoves, testMoves, "Wrong moves");
     }
 
     final static Map<Character, ChessPiece.PieceType> charToTypeMap = Map.of(
