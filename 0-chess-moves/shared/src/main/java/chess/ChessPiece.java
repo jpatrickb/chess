@@ -98,7 +98,7 @@ public class ChessPiece {
         }
 
 //        BISHOP
-        else if (piece.getPieceType() == PieceType.BISHOP) {
+        if (piece.getPieceType() == PieceType.BISHOP || piece.getPieceType() == PieceType.QUEEN) {
             int[] dirs = {-1, 1};
             for (var up : dirs){
                 for (var side : dirs) {
@@ -133,7 +133,7 @@ public class ChessPiece {
         }
 
 //        KING
-        else if (piece.getPieceType() == PieceType.KING) {
+        if (piece.getPieceType() == PieceType.KING) {
             int[] dirs = {-1, 0, 1};
             for (var up : dirs) {
                 for (var side : dirs) {
@@ -153,7 +153,7 @@ public class ChessPiece {
         }
 
 //        ROOK
-        else if (piece.getPieceType() == PieceType.ROOK) {
+        if (piece.getPieceType() == PieceType.ROOK || piece.getPieceType() == PieceType.QUEEN) {
             int[] dirs = {-1, 1};
             for (var dir : dirs) {
 //                Check vertical direction
@@ -196,7 +196,7 @@ public class ChessPiece {
 
 
 //        KNIGHT
-        else if (piece.getPieceType() == PieceType.KNIGHT) {
+        if (piece.getPieceType() == PieceType.KNIGHT) {
             int[] dirs = {-1, 1};
 
             for (var dir_r : dirs) {
@@ -229,6 +229,12 @@ public class ChessPiece {
             }
 
         }
+
+
+//        QUEEN
+//        else if (piece.getPieceType() == PieceType.QUEEN) {
+//
+//        }
 
         return valid_moves;
     }
