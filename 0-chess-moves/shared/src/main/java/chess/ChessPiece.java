@@ -3,7 +3,6 @@ package chess;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
-import java.util.Vector;
 
 /**
  * Represents a single chess piece
@@ -71,29 +70,71 @@ public class ChessPiece {
 
 //        PAWN
         if (piece.getPieceType() == PieceType.PAWN) {
+            PieceType[] types = {PieceType.QUEEN, PieceType.KNIGHT, PieceType.ROOK, PieceType.BISHOP};
 
 //            Get the color to find direction of movement
             int dir = 1;
+            int dist = 1;
+            boolean prom = false;
             if (piece.getTeamColor() == ChessGame.TeamColor.BLACK) {
                 dir = -1;
+                if (myPosition.getRow() == 7) {
+                    dist = 2;
+                } else if (myPosition.getRow() == 2) {
+                    prom = true;
+                }
+            } else {
+                if (myPosition.getRow() == 2) {
+                    dist = 2;
+                } else if (myPosition.getRow() == 7) {
+                    prom = true;
+                }
             }
 
 //            Check if the pawn can move forwards (must be empty)
             newPosition = new ChessPosition(row+dir, col);
             if (board.getPiece(newPosition) == null) {
-                valid_moves.add(new ChessMove(myPosition, newPosition, null));
+                if (prom) {
+                    for (var type : types) {
+                        valid_moves.add(new ChessMove(myPosition, newPosition, type));
+                    }
+                } else {
+                    valid_moves.add(new ChessMove(myPosition, newPosition, null));
+                    if (dist == 2) {
+                        newPosition = new ChessPosition(row + dist * dir, col);
+                        if (board.getPiece(newPosition) == null) {
+                            valid_moves.add(new ChessMove(myPosition, newPosition, null));
+                        }
+                    }
+                }
             }
 
 //            Check if the pawn can KO a piece diagonal to it on one direction
             newPosition = new ChessPosition(row+dir, col+1);
-            if (board.getPiece(newPosition).getTeamColor() != piece.getTeamColor()) {
-                valid_moves.add(new ChessMove(myPosition, newPosition, null));
+            if (board.getPiece(newPosition) != null) {
+                if (board.getPiece(newPosition).getTeamColor() != piece.getTeamColor()) {
+                    if (prom) {
+                        for (var type : types) {
+                            valid_moves.add(new ChessMove(myPosition, newPosition, type));
+                        }
+                    } else {
+                        valid_moves.add(new ChessMove(myPosition, newPosition, null));
+                    }
+                }
             }
 
 //            Check if the pawn can KO a piece diagonal to it on the other direction
             newPosition = new ChessPosition(row+dir, col-1);
-            if (board.getPiece(newPosition).getTeamColor() != piece.getTeamColor()) {
-                valid_moves.add(new ChessMove(myPosition, newPosition, null));
+            if (board.getPiece(newPosition) != null) {
+                if (board.getPiece(newPosition).getTeamColor() != piece.getTeamColor()) {
+                    if (prom) {
+                        for (var type : types) {
+                            valid_moves.add(new ChessMove(myPosition, newPosition, type));
+                        }
+                    } else {
+                        valid_moves.add(new ChessMove(myPosition, newPosition, null));
+                    }
+                }
             }
         }
 
