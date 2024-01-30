@@ -104,16 +104,14 @@ public class ChessGame {
      */
     public boolean isInCheck(TeamColor teamColor) {
         ChessPiece piece;
-        ChessPiece king;
         ChessPosition kingPosition = null;
-        ChessPosition currPosition = null;
+        ChessPosition currPosition;
         for (int row = 1; row <= 8; row++) {
             for (int col = 1; col <= 8; col++) {
                 currPosition = new ChessPosition(row, col);
                 if (this.board.getPiece(currPosition) != null) {
                     piece = this.board.getPiece(currPosition);
                     if (piece.getTeamColor() == teamColor && piece.getPieceType() == ChessPiece.PieceType.KING) {
-                        king = piece;
                         kingPosition = currPosition;
                         break;
                     }
