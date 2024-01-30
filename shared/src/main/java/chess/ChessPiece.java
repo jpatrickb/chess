@@ -45,6 +45,10 @@ public class ChessPiece {
         return this.type;
     }
 
+    private boolean inBounds(ChessPosition myPosition) {
+        return (myPosition.getRow() >= 1 && myPosition.getRow() <= 8 && myPosition.getColumn() >= 1 && myPosition.getColumn() <= 8);
+    }
+
     /**
      * Calculates all the positions a chess piece can move to
      * Does not take into account moves that are illegal due to leaving the king in
@@ -111,28 +115,32 @@ public class ChessPiece {
 
 //            Check if the pawn can KO a piece diagonal to it on one direction
             newPosition = new ChessPosition(row+dir, col+1);
-            if (board.getPiece(newPosition) != null) {
-                if (board.getPiece(newPosition).getTeamColor() != piece.getTeamColor()) {
-                    if (prom) {
-                        for (var type : types) {
-                            valid_moves.add(new ChessMove(myPosition, newPosition, type));
+            if (inBounds(newPosition)) {
+                if (board.getPiece(newPosition) != null) {
+                    if (board.getPiece(newPosition).getTeamColor() != piece.getTeamColor()) {
+                        if (prom) {
+                            for (var type : types) {
+                                valid_moves.add(new ChessMove(myPosition, newPosition, type));
+                            }
+                        } else {
+                            valid_moves.add(new ChessMove(myPosition, newPosition, null));
                         }
-                    } else {
-                        valid_moves.add(new ChessMove(myPosition, newPosition, null));
                     }
                 }
             }
 
 //            Check if the pawn can KO a piece diagonal to it on the other direction
             newPosition = new ChessPosition(row+dir, col-1);
-            if (board.getPiece(newPosition) != null) {
-                if (board.getPiece(newPosition).getTeamColor() != piece.getTeamColor()) {
-                    if (prom) {
-                        for (var type : types) {
-                            valid_moves.add(new ChessMove(myPosition, newPosition, type));
+            if (inBounds(newPosition)) {
+                if (board.getPiece(newPosition) != null) {
+                    if (board.getPiece(newPosition).getTeamColor() != piece.getTeamColor()) {
+                        if (prom) {
+                            for (var type : types) {
+                                valid_moves.add(new ChessMove(myPosition, newPosition, type));
+                            }
+                        } else {
+                            valid_moves.add(new ChessMove(myPosition, newPosition, null));
                         }
-                    } else {
-                        valid_moves.add(new ChessMove(myPosition, newPosition, null));
                     }
                 }
             }
