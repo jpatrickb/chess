@@ -14,7 +14,9 @@ public class ChessGame {
 
     public ChessGame() {
         this.turn = TeamColor.WHITE;
+        // Instantiate the board
         this.board = new ChessBoard();
+        // Set it up correctly
         this.board.resetBoard();
     }
 
@@ -106,32 +108,40 @@ public class ChessGame {
         ChessPiece piece;
         ChessPosition kingPosition = null;
         ChessPosition currPosition;
+        // First we need to find the king...
         for (int row = 1; row <= 8; row++) {
             for (int col = 1; col <= 8; col++) {
                 currPosition = new ChessPosition(row, col);
                 if (this.board.getPiece(currPosition) != null) {
                     piece = this.board.getPiece(currPosition);
                     if (piece.getTeamColor() == teamColor && piece.getPieceType() == ChessPiece.PieceType.KING) {
+                        // Found the king! Saving its position...
                         kingPosition = currPosition;
                         break;
                     }
                 }
             }
         }
+        // Now we check the moves for all other pieces
         for (int row = 1; row <= 8; row++) {
             for (int col = 1; col <= 8; col++) {
                 currPosition = new ChessPosition(row, col);
+                // Clearly null pieces can't have any valid moves
                 if (this.board.getPiece(currPosition) != null) {
 
                     piece = this.board.getPiece(currPosition);
+                    // Also don't care if the piece is the same color, since it can't attack its own king
                     if (piece.getTeamColor() != teamColor) {
+                        // Check whether this piece has a valid move from its position to the king's position
                         if (piece.pieceMoves(this.board, currPosition).contains(new ChessMove(currPosition, kingPosition, null))) {
+                            // All we need to find is one piece to know the king is in check...
                             return true;
                         }
                     }
                 }
             }
         }
+        // Looks like nothing was found, king is safe!
         return false;
     }
 
