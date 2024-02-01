@@ -65,10 +65,25 @@ public class ChessGame {
             allMoves = this.board.getPiece(startPosition).pieceMoves(this.board, startPosition);
             Collection<ChessMove> onlyValid = new HashSet<>(0);
             // TODO: Still need to figure out how to check whether a move will leave the king in check
-//            for (var move : allMoves) {
-//
-//            }
-            return allMoves;
+            for (var move : allMoves) {
+                // Find the starting and ending pieces
+                ChessPiece piece = this.board.getPiece(move.getStartPosition());
+                ChessPiece targetPiece = this.board.getPiece(move.getEndPosition());
+
+                // Try making the move
+                this.board.addPiece(move.getEndPosition(), piece);
+                this.board.removePiece(move.getStartPosition());
+
+                // Check if the king will be in check; if not, adds to valid moves
+                if (!this.isInCheck(piece.getTeamColor())) {
+                    onlyValid.add(move);
+                }
+
+                // Now resets the board
+                this.board.addPiece(move.getStartPosition(), piece);
+                this.board.addPiece(move.getEndPosition(), targetPiece);
+            }
+            return onlyValid;
         }
     }
 
@@ -97,16 +112,24 @@ public class ChessGame {
         } if (!possibleMoves.contains(move)){
             // Ensures that the move is actually a possible move
             throw new InvalidMoveException("Not a possible move for that piece");
-        } if (this.isInCheck(color)) {
-            // Ensures that this move doesn't leave the king in check
-            throw new InvalidMoveException("This move will leave the king in check");
         } else {
             // Now that the move has been verified, it is made!
+            ChessPiece newPiece = piece;
             if (move.getPromotionPiece() != null) {
-                piece = new ChessPiece(color, move.getPromotionPiece());
+                newPiece = new ChessPiece(color, move.getPromotionPiece());
             }
-            this.board.addPiece(move.getEndPosition(), piece);
+            ChessPiece takenPiece = this.board.getPiece(move.getEndPosition());
+            this.board.addPiece(move.getEndPosition(), newPiece);
             this.board.removePiece(move.getStartPosition());
+
+            // Ensures that this move doesn't leave the king in check
+            if (this.isInCheck(color)) {
+                this.board.addPiece(move.getEndPosition(), takenPiece);
+                this.board.addPiece(move.getStartPosition(), piece);
+                throw new InvalidMoveException("This move will leave the king in check");
+            }
+
+            // Set the new team's turn
             if (this.getTeamTurn() == TeamColor.WHITE) {
                 this.setTeamTurn(TeamColor.BLACK);
             } else {
