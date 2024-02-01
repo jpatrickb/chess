@@ -1,6 +1,8 @@
 package chess;
 
+import java.text.CollationElementIterator;
 import java.util.Collection;
+import java.util.HashSet;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -54,13 +56,19 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
+        Collection<ChessMove> allMoves = new HashSet<>(0);
         // Verify that there is a piece at this position
         if (this.board.getPiece(startPosition) == null) {
-            return null;
+            return allMoves;
         } else {
             // Once we have verified there is a piece, we can get a Collection of the valid ChessMoves
-            return this.board.getPiece(startPosition).pieceMoves(this.board, startPosition);
+            allMoves = this.board.getPiece(startPosition).pieceMoves(this.board, startPosition);
+            Collection<ChessMove> onlyValid = new HashSet<>(0);
             // TODO: Still need to figure out how to check whether a move will leave the king in check
+//            for (var move : allMoves) {
+//
+//            }
+            return allMoves;
         }
     }
 
@@ -81,20 +89,29 @@ public class ChessGame {
         if (color != turn) {
             // Check that the color of the piece moving is the same as the team's turn
             throw new InvalidMoveException("Not this team's turn to move");
-        } else if (this.board.getPiece(move.getEndPosition()) != null) {
+        } if (this.board.getPiece(move.getEndPosition()) != null) {
             if ((this.board.getPiece(move.getEndPosition()).getTeamColor() == color)) {
                 // Ensure that the move doesn't land on a piece from the same team
                 throw new InvalidMoveException("Can't move to a position with a piece of the same team");
             }
-        } else if (!possibleMoves.contains(move)){
+        } if (!possibleMoves.contains(move)){
             // Ensures that the move is actually a possible move
             throw new InvalidMoveException("Not a possible move for that piece");
-        } else if (this.isInCheck(color)) {
+        } if (this.isInCheck(color)) {
             // Ensures that this move doesn't leave the king in check
             throw new InvalidMoveException("This move will leave the king in check");
         } else {
             // Now that the move has been verified, it is made!
+            if (move.getPromotionPiece() != null) {
+                piece = new ChessPiece(color, move.getPromotionPiece());
+            }
             this.board.addPiece(move.getEndPosition(), piece);
+            this.board.removePiece(move.getStartPosition());
+            if (this.getTeamTurn() == TeamColor.WHITE) {
+                this.setTeamTurn(TeamColor.BLACK);
+            } else {
+                this.setTeamTurn(TeamColor.WHITE);
+            }
         }
     }
 
