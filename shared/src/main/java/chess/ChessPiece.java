@@ -74,7 +74,7 @@ public class ChessPiece {
 
 //        PAWN
         if (piece.getPieceType() == PieceType.PAWN) {
-            PieceType[] types = {PieceType.QUEEN, PieceType.KNIGHT, PieceType.ROOK, PieceType.BISHOP};
+            PieceType[] types = {PieceType.QUEEN, PieceType.KNIGHT, PieceType.ROOK, PieceType.BISHOP, null};
 
 //            Get the color to find direction of movement
             int dir = 1;
