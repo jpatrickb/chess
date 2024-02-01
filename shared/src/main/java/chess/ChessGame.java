@@ -193,7 +193,32 @@ public class ChessGame {
      */
     public boolean isInCheckmate(TeamColor teamColor) {
         // TODO: Figure out how to actually determine if the check is mated
-        return isInCheck(teamColor);
+        // If it's not in check, it obviously can't be in checkmate
+        if (!isInCheck(teamColor)) {
+            return false;
+        }
+
+        // Iterate through all possible moves, determine if they leave the king in check
+        for (int row = 1; row <= 8; row++) {
+            for (int col = 1; col <= 8; col++) {
+                // Initialize the starting position
+                ChessPosition position = new ChessPosition(row, col);
+
+                // Ensure it's not an empty position
+                if (this.board.getPiece(position) != null) {
+                    // Ensure the piece is on the team whose turn it is
+                    if (this.board.getPiece(position).getTeamColor() == teamColor) {
+                        // If the valid moves isn't empty, then there are possible moves (not checkmate)
+                        if (!this.validMoves(position).isEmpty()) {
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+
+        // If none had valid moves that wouldn't leave the king in check, then game over
+        return true;
     }
 
     /**
@@ -211,9 +236,15 @@ public class ChessGame {
             for (int row = 1; row <= 8; row++) {
                 for (int col = 1; col <= 8; col++) {
                     myPosition = new ChessPosition(row, col);
-                    // If there are any valid moves, it's not stalemate
-                    if (!this.validMoves(myPosition).isEmpty()) {
-                        return false;
+                    // Ensure not an empty spot
+                    if (this.board.getPiece(myPosition) != null) {
+                        // Ensure the piece is the right color
+                        if (this.board.getPiece(myPosition).getTeamColor() == teamColor) {
+                            // If there are any valid moves, it's not stalemate
+                            if (!this.validMoves(myPosition).isEmpty()) {
+                                return false;
+                            }
+                        }
                     }
                 }
             }
