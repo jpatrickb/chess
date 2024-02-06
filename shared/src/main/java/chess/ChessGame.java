@@ -15,6 +15,7 @@ public class ChessGame {
     private ChessBoard board;
 
     public ChessGame() {
+        // White starts
         this.turn = TeamColor.WHITE;
         // Instantiate the board
         this.board = new ChessBoard();
