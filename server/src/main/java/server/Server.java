@@ -1,10 +1,14 @@
 package server;
 
+import org.eclipse.jetty.websocket.server.WebSocketHandler;
 import spark.*;
 
 import java.nio.file.Paths;
 
 public class Server {
+
+    public Server() {
+    }
 
     public int run(int desiredPort) {
         Spark.port(desiredPort);
@@ -12,7 +16,9 @@ public class Server {
         var webDir = Paths.get(Server.class.getProtectionDomain().getCodeSource().getLocation().getPath(), "web");
         Spark.externalStaticFileLocation(webDir.toString());
 
+
         // Register your endpoints and handle exceptions here.
+
 
         Spark.awaitInitialization();
         return Spark.port();
