@@ -11,4 +11,7 @@ public class ResponseException extends Exception {
     public int StatusCode() {
         return statusCode;
     }
+
+    public String getMessage() {return super.getMessage();}
+
 }

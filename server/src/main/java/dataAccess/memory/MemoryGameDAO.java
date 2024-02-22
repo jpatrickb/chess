@@ -8,15 +8,13 @@ import java.util.Collection;
 import java.util.HashMap;
 
 public class MemoryGameDAO implements GameDAO {
-    private final HashMap<Integer, HashMap<String, String>> gameList = new HashMap<>();
-    private final HashMap<Integer, ChessGame> gameObjects = new HashMap<>();
+    private final HashMap<Integer, GameData> gameList = new HashMap<>();
     public void clear() {
         gameList.clear();
-        gameObjects.clear();
     }
 
     @Override
-    public GameData createGame() {
+    public GameData createGame(String gameName) {
         return null;
     }
 

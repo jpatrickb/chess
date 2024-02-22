@@ -5,12 +5,18 @@ import dataAccess.memory.MemoryGameDAO;
 import dataAccess.memory.MemoryUserDAO;
 
 public class ClearService {
-    private static final MemoryUserDAO memoryUserDAO = new MemoryUserDAO();
-    private static final MemoryAuthDAO memoryAuthDAO = new MemoryAuthDAO();
-    private static final MemoryGameDAO memoryGameDAO = new MemoryGameDAO();
+    private final MemoryUserDAO memoryUserDAO;
+    private final MemoryAuthDAO memoryAuthDAO;
+    private final MemoryGameDAO memoryGameDAO;
+
+    public ClearService(MemoryUserDAO memoryUserDAO, MemoryAuthDAO memoryAuthDAO, MemoryGameDAO memoryGameDAO) {
+        this.memoryUserDAO = memoryUserDAO;
+        this.memoryAuthDAO = memoryAuthDAO;
+        this.memoryGameDAO = memoryGameDAO;
+    }
 
 
-    public static void clearDatabase() {
+    public void clearDatabase() {
         memoryUserDAO.clear();
         memoryAuthDAO.clear();
         memoryGameDAO.clear();

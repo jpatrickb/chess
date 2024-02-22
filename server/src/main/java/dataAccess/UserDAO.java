@@ -5,7 +5,9 @@ import model.UserData;
 
 public interface UserDAO {
 
-    public boolean getUser(UserData userData) throws ResponseException;
+    public boolean isUser(UserData userData) throws ResponseException;
+
+    public UserData getUser(String username);
 
     public void createUser(UserData userData);
 
