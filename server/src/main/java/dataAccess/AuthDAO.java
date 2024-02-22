@@ -1,4 +1,4 @@
 package dataAccess;
 
-public class AuthDAO {
+public interface AuthDAO {
 }

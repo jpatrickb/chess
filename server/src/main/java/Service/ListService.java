@@ -1,4 +1,4 @@
-package server.Service;
+package Service;
 
 public class ListService {
 }

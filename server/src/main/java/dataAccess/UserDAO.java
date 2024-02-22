@@ -1,4 +1,12 @@
 package dataAccess;
 
-public class UserDAO {
+import exception.ResponseException;
+import model.UserData;
+
+public interface UserDAO {
+
+    public boolean getUser(UserData userData) throws ResponseException;
+
+    public void createUser(UserData userData);
+
 }
