@@ -5,12 +5,12 @@ import model.UserData;
 
 public interface UserDAO {
 
-    public boolean isUser(UserData userData) throws ResponseException;
+    boolean isUser(UserData userData) throws ResponseException;
 
-    public UserData getUser(String username);
+    UserData getUser(String username);
 
-    public void createUser(UserData userData);
+    void createUser(UserData userData);
 
-    public void clear();
+    void clear();
 
 }

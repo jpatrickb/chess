@@ -1,18 +1,15 @@
 package dataAccess.memory;
 
 import dataAccess.UserDAO;
-import exception.ResponseException;
 import model.UserData;
 
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 
 public class MemoryUserDAO implements UserDAO {
 
     private  final HashMap<String, UserData> allUsers = new HashMap<>();
 
-    public boolean isUser(UserData userData) throws ResponseException {
+    public boolean isUser(UserData userData) {
         return allUsers.containsKey(userData.username());
     }
 

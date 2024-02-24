@@ -1,6 +1,5 @@
 package dataAccess.memory;
 
-import chess.ChessGame;
 import dataAccess.GameDAO;
 import model.GameData;
 
@@ -23,7 +22,7 @@ public class MemoryGameDAO implements GameDAO {
 
     @Override
     public GameData getGame(int gameID) {
-        return null;
+        return gameList.get(gameID);
     }
 
     @Override
@@ -32,7 +31,7 @@ public class MemoryGameDAO implements GameDAO {
     }
 
     @Override
-    public void updateGame() {
-
+    public void updateGame(Integer gameID, GameData gameData) {
+        gameList.put(gameID, gameData);
     }
 }

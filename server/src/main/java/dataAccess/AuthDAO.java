@@ -4,11 +4,13 @@ import model.AuthData;
 import model.UserData;
 
 public interface AuthDAO {
-    public void clear();
+    void clear();
 
-    public AuthData createAuth(UserData userData);
+    AuthData createAuth(UserData userData);
 
-    public boolean authExists(String authToken);
+    boolean authExists(String authToken);
 
-    public boolean deleteAuth(String authToken);
+    AuthData getAuth(String authToken);
+
+    boolean deleteAuth(String authToken);
 }

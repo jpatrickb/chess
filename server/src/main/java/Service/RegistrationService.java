@@ -2,14 +2,10 @@ package Service;
 
 import dataAccess.AuthDAO;
 import dataAccess.UserDAO;
-import dataAccess.memory.MemoryAuthDAO;
-import dataAccess.memory.MemoryUserDAO;
 import exception.ResponseException;
 import handlers.RegistrationRequest;
 import model.AuthData;
 import model.UserData;
-
-import java.util.*;
 
 public class RegistrationService {
 
@@ -37,18 +33,14 @@ public class RegistrationService {
 
 //        Make sure the username is unique
         UserData userData = new UserData(userRequest.username(), userRequest.password(), userRequest.email());
-        if (userDAO.isUser(userData)) {
+        if (this.userDAO.isUser(userData)) {
             throw new ResponseException(403, "error: already taken");
         } else {
 //            Add the user to the database if it's all new
-            userDAO.createUser(userData);
+            this.userDAO.createUser(userData);
 
-            return authDAO.createAuth(userData);
+            return this.authDAO.createAuth(userData);
         }
-    }
-
-    private static AuthData generateAuth(UserData userData) {
-        return new AuthData(userData.username(), UUID.randomUUID().toString());
     }
 
 }

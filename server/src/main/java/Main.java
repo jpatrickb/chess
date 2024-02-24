@@ -16,8 +16,6 @@ public class Main {
         } catch (Throwable e) {
             System.out.printf("Unable to start server: %s%n", e.getMessage());
         }
-//        Server server = new Server();
-//        server.run(8080);
         var piece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
         System.out.println("♕ 240 Chess Server: " + piece);
     }
