@@ -1,5 +1,7 @@
 package Service;
 
+import dataAccess.AuthDAO;
+import dataAccess.UserDAO;
 import dataAccess.memory.MemoryAuthDAO;
 import dataAccess.memory.MemoryUserDAO;
 import exception.ResponseException;
@@ -11,12 +13,12 @@ import java.util.*;
 
 public class RegistrationService {
 
-    private final MemoryUserDAO memoryUserDAO;
-    private final MemoryAuthDAO memoryAuthDAO;
+    private final UserDAO userDAO;
+    private final AuthDAO authDAO;
 
-    public RegistrationService(MemoryUserDAO memoryUserDAO, MemoryAuthDAO memoryAuthDAO) {
-        this.memoryUserDAO = memoryUserDAO;
-        this.memoryAuthDAO = memoryAuthDAO;
+    public RegistrationService(UserDAO userDAO, AuthDAO authDAO) {
+        this.userDAO = userDAO;
+        this.authDAO = authDAO;
     }
 
 
@@ -35,13 +37,13 @@ public class RegistrationService {
 
 //        Make sure the username is unique
         UserData userData = new UserData(userRequest.username(), userRequest.password(), userRequest.email());
-        if (memoryUserDAO.isUser(userData)) {
+        if (userDAO.isUser(userData)) {
             throw new ResponseException(403, "error: already taken");
         } else {
 //            Add the user to the database if it's all new
-            memoryUserDAO.createUser(userData);
+            userDAO.createUser(userData);
 
-            return memoryAuthDAO.createAuth(userData);
+            return authDAO.createAuth(userData);
         }
     }
 

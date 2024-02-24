@@ -23,8 +23,8 @@ public class MemoryAuthDAO implements AuthDAO {
     }
 
     @Override
-    public boolean authExists(AuthData authData) {
-        return authTokens.containsKey(authData.authToken());
+    public boolean authExists(String authToken) {
+        return authTokens.containsKey(authToken);
     }
 
     @Override

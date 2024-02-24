@@ -8,7 +8,7 @@ public interface AuthDAO {
 
     public AuthData createAuth(UserData userData);
 
-    public boolean authExists(AuthData authData);
+    public boolean authExists(String authToken);
 
     public boolean deleteAuth(String authToken);
 }

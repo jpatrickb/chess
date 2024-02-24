@@ -1,37 +1,37 @@
 package server;
 
 import com.google.gson.Gson;
+import dataAccess.AuthDAO;
 import dataAccess.GameDAO;
+import dataAccess.UserDAO;
 import dataAccess.memory.MemoryAuthDAO;
 import dataAccess.memory.MemoryGameDAO;
 import dataAccess.memory.MemoryUserDAO;
 import exception.ErrorMessage;
 import exception.ResponseException;
-import handlers.ListGamesRequest;
-import handlers.LoginRequest;
-import handlers.LogoutRequest;
-import handlers.RegistrationRequest;
+import handlers.*;
 import model.AuthData;
-import model.GameData;
-import model.UserData;
+import model.GameID;
 import Service.*;
+import model.GameResponseData;
 import spark.*;
 
-import java.nio.file.Paths;
+import java.util.Collection;
 
 public class Server {
 
-    private final MemoryAuthDAO memoryAuthDAO = new MemoryAuthDAO();
-    private final MemoryUserDAO memoryUserDAO = new MemoryUserDAO();
-    private final MemoryGameDAO memoryGameDAO = new MemoryGameDAO();
+    private final AuthDAO authDAO = new MemoryAuthDAO();
+    private final UserDAO userDAO = new MemoryUserDAO();
+    private final GameDAO gameDAO = new MemoryGameDAO();
 
-    private final RegistrationService registrationService = new RegistrationService(memoryUserDAO, memoryAuthDAO);
-    private final LoginService loginService = new LoginService(memoryUserDAO, memoryAuthDAO);
-    private final LogoutService logoutService = new LogoutService(memoryAuthDAO);
-    private final ListService listService = new ListService();
+    private final RegistrationService registrationService = new RegistrationService(userDAO, authDAO);
+    private final LoginService loginService = new LoginService(userDAO, authDAO);
+    private final LogoutService logoutService = new LogoutService(authDAO);
+    private final ListService listService = new ListService(authDAO, gameDAO);
     private final JoinService joinService = new JoinService();
-    private final GameService gameService = new GameService();
-    private final ClearService clearService = new ClearService(memoryUserDAO, memoryAuthDAO, memoryGameDAO);
+    private final GameService gameService = new GameService(gameDAO);
+    private final ClearService clearService = new ClearService(userDAO, authDAO, gameDAO);
+    private final AuthenticationService authService = new AuthenticationService(authDAO);
 
 
 
@@ -131,27 +131,55 @@ public class Server {
 
     private Object getGames(Request request, Response response) {
 //        TODO
-        var authToken = new ListGamesRequest(request.headers("authorization"));
-
-        return null;
+        var authToken = request.headers("authorization");
+        try {
+            authService.authenticate(authToken);
+            Collection<GameResponseData> allGames = listService.getGames();
+            response.status(200);
+            response.body(new Gson().toJson(new ListGamesResponse(allGames)));
+            return new Gson().toJson(new ListGamesResponse(allGames));
+        } catch (ResponseException e) {
+            response.status(e.StatusCode());
+            response.body(new Gson().toJson(new ErrorMessage(e.getMessage())));
+            return new Gson().toJson(new ErrorMessage(e.getMessage()));
+        }
     }
 
     private Object joinGame(Request request, Response response) {
 //        TODO
-        var playerColor = request.queryParams("playerColor");
-        var gameID = request.queryParams("gameID");
+        var authToken = request.headers("authorization");
+        try {
+            authService.authenticate(authToken);
+            var playerColor = request.queryParams("playerColor");
+            var gameID = request.queryParams("gameID");
 
-        return "";
+            return "";
+        } catch (ResponseException e) {
+            response.status(e.StatusCode());
+            response.body(new Gson().toJson(new ErrorMessage(e.getMessage())));
+            return new Gson().toJson(new ErrorMessage(e.getMessage()));
+        }
     }
 
     private Object createGame(Request request, Response response) {
 //        TODO
-        var newGame = request.queryParams("gameName");
+        var gameName = request.queryParams("gameName");
+        var authToken = request.headers("authorization");
+        var newGame = new CreateGameRequest(authToken, gameName);
+
+        try {
+            authService.authenticate(authToken);
+            GameID gameID = gameService.createGame(newGame);
+            response.status(200);
+            response.body(new Gson().toJson(gameID));
+            return new Gson().toJson(gameID);
+        } catch (ResponseException e) {
+            response.status(e.StatusCode());
+            response.body(new Gson().toJson(new ErrorMessage(e.getMessage())));
+            return new Gson().toJson(new ErrorMessage(e.getMessage()));
+        }
 
 
-
-        response.status(200);
-        return "{ 'gameID':1234}";
     }
 
     private Object clearApp(Request request, Response response) {

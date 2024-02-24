@@ -14,9 +14,12 @@ public class MemoryGameDAO implements GameDAO {
     }
 
     @Override
-    public GameData createGame(String gameName) {
-        return null;
+    public void addGame(GameData gameData) {
+        var gameID = gameData.gameID();
+        gameList.put(gameID, gameData);
     }
+
+
 
     @Override
     public GameData getGame(int gameID) {
@@ -25,7 +28,7 @@ public class MemoryGameDAO implements GameDAO {
 
     @Override
     public Collection<GameData> listGames() {
-        return null;
+        return gameList.values();
     }
 
     @Override
