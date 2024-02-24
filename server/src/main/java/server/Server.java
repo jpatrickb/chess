@@ -2,11 +2,9 @@ package server;
 
 import com.google.gson.Gson;
 import dataAccess.AuthDAO;
+import dataAccess.DataAccess;
 import dataAccess.GameDAO;
 import dataAccess.UserDAO;
-import dataAccess.memory.MemoryAuthDAO;
-import dataAccess.memory.MemoryGameDAO;
-import dataAccess.memory.MemoryUserDAO;
 import exception.ErrorMessage;
 import exception.ResponseException;
 import handlers.*;
@@ -19,10 +17,14 @@ import spark.*;
 import java.util.Collection;
 
 public class Server {
+//    This line is to use the memory data access
+    private final DataAccess dataAccess = new DataAccess(DataAccess.DataLocation.MEMORY);
 
-    private final AuthDAO authDAO = new MemoryAuthDAO();
-    private final UserDAO userDAO = new MemoryUserDAO();
-    private final GameDAO gameDAO = new MemoryGameDAO();
+//    This line is to use the SQL data access
+//    private final DataAccess dataAccess = new DataAccess(DataAccess.DataLocation.SQL);
+    private final AuthDAO authDAO = dataAccess.getAuthDAO();
+    private final UserDAO userDAO = dataAccess.getUserDAO();
+    private final GameDAO gameDAO = dataAccess.getGameDAO();
 
     private final RegistrationService registrationService = new RegistrationService(userDAO, authDAO);
     private final LoginService loginService = new LoginService(userDAO, authDAO);
