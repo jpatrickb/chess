@@ -1,11 +1,9 @@
 package dataAccess;
-
-import exception.ResponseException;
 import model.UserData;
 
 public interface UserDAO {
 
-    boolean isUser(UserData userData) throws ResponseException;
+    boolean isUser(UserData userData);
 
     UserData getUser(String username);
 
