@@ -19,10 +19,13 @@ public class ListServiceTest {
     }
 
     @Test
-    void testGetGames() {
+    void testGetGamesEmpty() {
 //        Test that there are currently no games
         Assertions.assertTrue(service.getGames().isEmpty());
+    }
 
+    @Test
+    void testGetGamesNonEmpty() {
         gameService.createGame(new CreateGameRequest("game1"));
         gameService.createGame(new CreateGameRequest("game2"));
         gameService.createGame(new CreateGameRequest("game3"));

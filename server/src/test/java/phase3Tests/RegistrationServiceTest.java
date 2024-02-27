@@ -23,25 +23,28 @@ public class RegistrationServiceTest {
     }
 
     @Test
-    void testRegisterUser() {
+    void testRegisterUserGood() {
         RegistrationRequest realReq = new RegistrationRequest(
                 "realName",
                 "realPassword",
                 "email@email.com");
-
-        RegistrationRequest badReq = new RegistrationRequest(
-                null,
-                "badpassword",
-                "bademail"
-        );
-
-//        Ensure that good requests must be handled
-        Assertions.assertThrows(ResponseException.class, () -> service.registerUser(badReq));
 
 //        Test that a real user can be registered
         Assertions.assertDoesNotThrow(() -> service.registerUser(realReq));
 
 //        Test against registering again
         Assertions.assertThrows(ResponseException.class, () -> service.registerUser(realReq));
+    }
+
+    @Test
+    void testRegisterUserBad() {
+        RegistrationRequest badReq = new RegistrationRequest(
+                null,
+                "badPassword",
+                "badEmail"
+        );
+
+//        Ensure that good requests must be handled
+        Assertions.assertThrows(ResponseException.class, () -> service.registerUser(badReq));
     }
 }

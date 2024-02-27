@@ -23,9 +23,8 @@ public class JoinServiceTest {
     }
 
     @Test
-    void testJoinGame() {
+    void testJoinGameBad() {
         GameID gameID = gameService.createGame(new CreateGameRequest("testGame"));
-        JoinGameRequest req = new JoinGameRequest("WHITE", gameID.gameID());
 
         AuthData authData = new AuthData("testUser", "12345");
 
@@ -34,6 +33,14 @@ public class JoinServiceTest {
 
 //        Test bad color
         Assertions.assertThrows(ResponseException.class, () -> service.joinGame(new JoinGameRequest("green", gameID.gameID()), authData));
+    }
+
+    @Test
+    void testJoinGameGood() {
+        GameID gameID = gameService.createGame(new CreateGameRequest("testGame"));
+        JoinGameRequest req = new JoinGameRequest("WHITE", gameID.gameID());
+
+        AuthData authData = new AuthData("testUser", "12345");
 
 //        Test properly add player
         Assertions.assertDoesNotThrow(() -> service.joinGame(req, authData));

@@ -20,10 +20,13 @@ public class LogoutServiceTest {
     }
 
     @Test
-    void testLogoutUser() {
+    void testLogoutUserInvalid() {
 //        Test that a user that is not logged in cannot log out
         Assertions.assertThrows(ResponseException.class, () -> service.logoutUser(new LogoutRequest("1234")));
+    }
 
+    @Test
+    void testLogoutUserValid() {
         UserData userData = new UserData("realUser", "realPassword", "email@email.com");
 
         AuthData authData = authDAO.createAuth(userData);

@@ -18,13 +18,17 @@ public class GameServiceTest {
     }
 
     @Test
-    void testCreateGame() {
+    void testCreateGameNotNull() {
         CreateGameRequest newGame = new CreateGameRequest("testGame");
 
         GameID gameID = service.createGame(newGame);
 
 //        Positive test case (asserting that trying to get the game returns a valid game and not null)
         Assertions.assertNotNull(gameDAO.getGame(gameID.gameID()));
+    }
+
+    @Test
+    void testCreateGameNull() {
 //        Negative test
         Assertions.assertNull(gameDAO.getGame(1234));
     }

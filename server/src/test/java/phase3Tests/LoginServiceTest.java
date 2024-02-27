@@ -23,9 +23,14 @@ public class LoginServiceTest {
     }
 
     @Test
-    void testLogin() throws ResponseException {
+    void testLoginUnauthorized() {
 //        Test that a nonexistent user is unauthorized
         Assertions.assertThrows(ResponseException.class, () -> service.login(new LoginRequest("fakeName", "1234")));
+    }
+
+    @Test
+    void testLoginValid() throws ResponseException {
+
 
         UserData userData = new UserData("realName", "realPassword", "realEmail@email.com");
 
