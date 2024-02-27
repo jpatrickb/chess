@@ -1,6 +1,5 @@
 package chess;
 
-import javax.swing.plaf.basic.BasicHTML;
 import java.util.Arrays;
 
 /**
@@ -10,13 +9,13 @@ import java.util.Arrays;
  * signature of the existing methods.
  */
 public class ChessBoard {
-    private ChessPiece[][] Board;
+    private ChessPiece[][] board;
 
     public ChessBoard() {
-        this.Board = new ChessPiece[8][8];
+        this.board = new ChessPiece[8][8];
         for (int i=0; i<8; i++) {
             for (int j=0; j<8; j++) {
-                this.Board[i][j] = null;
+                this.board[i][j] = null;
             }
         }
     }
@@ -28,11 +27,11 @@ public class ChessBoard {
      * @param piece    the piece to add
      */
     public void addPiece(ChessPosition position, ChessPiece piece) {
-        this.Board[position.getRow() - 1][position.getColumn() - 1] = piece;
+        this.board[position.getRow() - 1][position.getColumn() - 1] = piece;
     }
 
     public void removePiece(ChessPosition position) {
-        this.Board[position.getRow() - 1][position.getColumn() - 1] = null;
+        this.board[position.getRow() - 1][position.getColumn() - 1] = null;
     }
 
     /**
@@ -43,7 +42,7 @@ public class ChessBoard {
      * position
      */
     public ChessPiece getPiece(ChessPosition position) {
-        return this.Board[position.getRow() - 1][position.getColumn() - 1];
+        return this.board[position.getRow() - 1][position.getColumn() - 1];
     }
 
     /**
@@ -52,7 +51,7 @@ public class ChessBoard {
      */
     public void resetBoard() {
 //        Clear Board
-        this.Board = new ChessPiece[8][8];
+        this.board = new ChessPiece[8][8];
 
 //        Put new pieces on the board
 //        Pawns
@@ -85,11 +84,11 @@ public class ChessBoard {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ChessBoard that = (ChessBoard) o;
-        return Arrays.deepEquals(Board, that.Board);
+        return Arrays.deepEquals(board, that.board);
     }
 
     @Override
     public int hashCode() {
-        return Arrays.deepHashCode(Board);
+        return Arrays.deepHashCode(board);
     }
 }

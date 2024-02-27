@@ -20,7 +20,7 @@ public class ResponseException extends Exception {
      *
      * @return integer containing the HTTP status code
      */
-    public int StatusCode() {
+    public int statusCode() {
         return statusCode;
     }
 

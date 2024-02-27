@@ -1,6 +1,5 @@
 package chess;
 
-import java.text.CollationElementIterator;
 import java.util.Collection;
 import java.util.HashSet;
 
@@ -65,7 +64,6 @@ public class ChessGame {
             // Once we have verified there is a piece, we can get a Collection of the valid ChessMoves
             allMoves = this.board.getPiece(startPosition).pieceMoves(this.board, startPosition);
             Collection<ChessMove> onlyValid = new HashSet<>(0);
-            // TODO: Still need to figure out how to check whether a move will leave the king in check
             for (var move : allMoves) {
                 // Find the starting and ending pieces
                 ChessPiece piece = this.board.getPiece(move.getStartPosition());
@@ -146,6 +144,8 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
+
+        ChessPiece.PieceType[] types = {ChessPiece.PieceType.QUEEN, ChessPiece.PieceType.KNIGHT, ChessPiece.PieceType.ROOK, ChessPiece.PieceType.BISHOP, null};
         ChessPiece piece;
         ChessPosition kingPosition = null;
         ChessPosition currPosition;
@@ -174,9 +174,11 @@ public class ChessGame {
                     // Also don't care if the piece is the same color, since it can't attack its own king
                     if (piece.getTeamColor() != teamColor) {
                         // Check whether this piece has a valid move from its position to the king's position
-                        if (piece.pieceMoves(this.board, currPosition).contains(new ChessMove(currPosition, kingPosition, null))) {
-                            // All we need to find is one piece to know the king is in check...
-                            return true;
+                        for (var type : types) {
+                            if (piece.pieceMoves(this.board, currPosition).contains(new ChessMove(currPosition, kingPosition, type))) {
+                                // All we need to find is one piece to know the king is in check...
+                                return true;
+                            }
                         }
                     }
                 }
@@ -193,7 +195,6 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        // TODO: Figure out how to actually determine if the check is mated
         // If it's not in check, it obviously can't be in checkmate
         if (!isInCheck(teamColor)) {
             return false;
