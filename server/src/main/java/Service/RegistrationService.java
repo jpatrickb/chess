@@ -7,11 +7,19 @@ import handlers.RegistrationRequest;
 import model.AuthData;
 import model.UserData;
 
+/**
+ * Handles requests to register new users
+ */
 public class RegistrationService {
 
     private final UserDAO userDAO;
     private final AuthDAO authDAO;
 
+    /**
+     *
+     * @param userDAO UserDAO object providing access to the user data
+     * @param authDAO AuthDAO object providing access to the authorization data
+     */
     public RegistrationService(UserDAO userDAO, AuthDAO authDAO) {
         this.userDAO = userDAO;
         this.authDAO = authDAO;
@@ -24,6 +32,8 @@ public class RegistrationService {
      *
      * @param userRequest The user object to be registered
      * @return the AuthToken object that has been created
+     * @throws ResponseException indicating either invalid fields (bad request) or that the username is already taken
+     * (already taken)
      */
     public AuthData registerUser(RegistrationRequest userRequest) throws ResponseException {
 //        Ensure valid request

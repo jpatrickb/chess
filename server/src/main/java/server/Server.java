@@ -16,6 +16,9 @@ import spark.*;
 
 import java.util.Collection;
 
+/**
+ * Initializes a server to run the chess games on
+ */
 public class Server {
 //    This line is to use the memory data access
     private final DataAccess dataAccess = new DataAccess(DataAccess.DataLocation.MEMORY);
@@ -95,6 +98,13 @@ public class Server {
         return new Gson().toJson(authData);
     }
 
+    /**
+     * Logs in new users
+     * @param request HTTP request - body is probed for username and password
+     * @param response HTTP response
+     * @return JSON of the authorization data upon successful login
+     * @throws ResponseException if unsuccessful log in, indicating incorrect password or other errors
+     */
     private Object loginUser(Request request, Response response) throws ResponseException {
         response.type("application/json");
 
@@ -106,6 +116,13 @@ public class Server {
         return new Gson().toJson(authData);
     }
 
+    /**
+     * Logs a user out
+     * @param request HTTP request - headers are probed for authorization
+     * @param response HTTP response
+     * @return Nothing
+     * @throws ResponseException If user is unauthorized to log out, or other errors
+     */
     private Object logoutUser(Request request, Response response) throws ResponseException {
         response.type("application/json");
         var authToken = new LogoutRequest(request.headers("authorization"));
@@ -115,6 +132,13 @@ public class Server {
         return "";
     }
 
+    /**
+     * Lists all the games for the user to see
+     * @param request HTTP request - header is probed for authorization
+     * @param response HTTP response
+     * @return JSON containing a collection of the games
+     * @throws ResponseException If user is unauthorized
+     */
     private Object getGames(Request request, Response response) throws ResponseException {
         var authToken = request.headers("authorization");
         authService.authenticate(authToken);
@@ -126,6 +150,13 @@ public class Server {
         return new Gson().toJson(new ListGamesResponse(allGames));
     }
 
+    /**
+     * Joins a new game
+     * @param request HTTP request - body containing gameID, header containing authorization
+     * @param response HTTP response
+     * @return Nothing
+     * @throws ResponseException If the user is unauthorized
+     */
     private Object joinGame(Request request, Response response) throws ResponseException {
         var authToken = request.headers("authorization");
         authService.authenticate(authToken);
@@ -139,6 +170,13 @@ public class Server {
         return "";
     }
 
+    /**
+     * Creates a new game
+     * @param request HTTP request - body contains gameName, header contains authorization
+     * @param response HTTP response
+     * @return JSON containing gameID of the game created
+     * @throws ResponseException If the user is unauthorized
+     */
     private Object createGame(Request request, Response response) throws ResponseException {
         var authToken = request.headers("authorization");
         authService.authenticate(authToken);
@@ -153,8 +191,13 @@ public class Server {
 
     }
 
+    /**
+     * Clears all databases
+     * @param request HTTP Request
+     * @param response HTTP Response
+     * @return Nothing
+     */
     private Object clearApp(Request request, Response response) {
-//        TODO
         clearService.clearDatabase();
         response.status(200);
         return "";
