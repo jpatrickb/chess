@@ -24,9 +24,11 @@ public class AuthenticationService {
      * @param authToken a String of the authToken provided in the HTTP header
      * @throws ResponseException Indicating that the authToken is not valid
      */
-    public void authenticate(String authToken) throws ResponseException {
+    public boolean authenticate(String authToken) throws ResponseException {
         if (!this.authDAO.authExists(authToken)) {
             throw new ResponseException(401, "error: unauthorized");
+        } else {
+            return true;
         }
     }
 
