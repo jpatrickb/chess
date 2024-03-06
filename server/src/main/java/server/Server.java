@@ -20,27 +20,40 @@ import java.util.Collection;
  * Initializes a server to run the chess games on
  */
 public class Server {
-//    This line is to use the memory data access
-    private final DataAccess dataAccess = new DataAccess(DataAccess.DataLocation.MEMORY);
 
-//    This line is to use the SQL data access
-//    private final DataAccess dataAccess = new DataAccess(DataAccess.DataLocation.SQL);
-    private final AuthDAO authDAO = dataAccess.getAuthDAO();
-    private final UserDAO userDAO = dataAccess.getUserDAO();
-    private final GameDAO gameDAO = dataAccess.getGameDAO();
-
-    private final RegistrationService registrationService = new RegistrationService(userDAO, authDAO);
-    private final LoginService loginService = new LoginService(userDAO, authDAO);
-    private final LogoutService logoutService = new LogoutService(authDAO);
-    private final ListService listService = new ListService(gameDAO);
-    private final JoinService joinService = new JoinService(gameDAO);
-    private final GameService gameService = new GameService(gameDAO);
-    private final ClearService clearService = new ClearService(userDAO, authDAO, gameDAO);
-    private final AuthenticationService authService = new AuthenticationService(authDAO);
+    private RegistrationService registrationService;
+    private LoginService loginService;
+    private LogoutService logoutService;
+    private ListService listService;
+    private JoinService joinService;
+    private GameService gameService;
+    private ClearService clearService;
+    private AuthenticationService authService;
 
 
 
     public Server() {
+        try {
+//            This line is to use the memory data access
+//            DataAccess dataAccess = new DataAccess(DataAccess.DataLocation.MEMORY);
+
+//            This line is to use the SQL data access
+            DataAccess dataAccess = new DataAccess(DataAccess.DataLocation.SQL);
+            AuthDAO authDAO = dataAccess.getAuthDAO();
+            UserDAO userDAO = dataAccess.getUserDAO();
+            GameDAO gameDAO = dataAccess.getGameDAO();
+
+            registrationService = new RegistrationService(userDAO, authDAO);
+            loginService = new LoginService(userDAO, authDAO);
+            logoutService = new LogoutService(authDAO);
+            listService = new ListService(gameDAO);
+            joinService = new JoinService(gameDAO);
+            gameService = new GameService(gameDAO);
+            clearService = new ClearService(userDAO, authDAO, gameDAO);
+            authService = new AuthenticationService(authDAO);
+        } catch (ResponseException ex) {
+            System.out.printf("Unable to connect to database: %s%n", ex.getMessage());
+        }
     }
 
     public int run(int desiredPort) {
@@ -197,7 +210,7 @@ public class Server {
      * @param response HTTP Response
      * @return Nothing
      */
-    private Object clearApp(Request request, Response response) {
+    private Object clearApp(Request request, Response response) throws ResponseException {
         clearService.clearDatabase();
         response.status(200);
         return "";

@@ -2,6 +2,7 @@ package phase3Tests;
 
 import Service.RegistrationService;
 import dataAccess.AuthDAO;
+import dataAccess.DataAccessException;
 import dataAccess.UserDAO;
 import dataAccess.memory.MemoryAuthDAO;
 import dataAccess.memory.MemoryUserDAO;
@@ -17,7 +18,7 @@ public class RegistrationServiceTest {
     static final RegistrationService service = new RegistrationService(userDAO, authDAO);
 
     @BeforeEach
-    void clear() {
+    void clear() throws DataAccessException {
         userDAO.clear();
         authDAO.clear();
     }

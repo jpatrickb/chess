@@ -3,6 +3,12 @@ package dataAccess;
 import dataAccess.memory.MemoryAuthDAO;
 import dataAccess.memory.MemoryGameDAO;
 import dataAccess.memory.MemoryUserDAO;
+import dataAccess.mySQL.MySQLAuthDAO;
+import dataAccess.mySQL.MySQLGameDAO;
+import dataAccess.mySQL.MySQLUserDAO;
+import exception.ResponseException;
+
+import java.sql.SQLException;
 
 /**
  * DataAccess class to provide access to the correct data access objects
@@ -16,12 +22,15 @@ public class DataAccess {
      * Upon initialization, determines whether to use SQL server or memory
      * @param dataLocation DataLocation object indicating where to look for data
      */
-    public DataAccess(DataLocation dataLocation) {
+    public DataAccess(DataLocation dataLocation) throws ResponseException {
         if (dataLocation == DataLocation.SQL) {
+            configureDatabase();
             try {
-                throw new DataAccessException("Can't yet use SQL");
-            } catch (DataAccessException e) {
-                throw new RuntimeException(e);
+                this.authDAO = new MySQLAuthDAO();
+                this.userDAO = new MySQLUserDAO();
+                this.gameDAO = new MySQLGameDAO();
+            } catch (SQLException ex) {
+                throw new ResponseException(500, String.format("Unable to connect to database: %s%n", ex.getMessage()));
             }
         } else if (dataLocation == DataLocation.MEMORY) {
             this.authDAO = new MemoryAuthDAO();
@@ -60,5 +69,52 @@ public class DataAccess {
     public enum DataLocation {
         SQL,
         MEMORY
+    }
+
+    private final String[] createStatements = {
+        """
+        CREATE TABLE IF NOT EXISTS USERS (
+            `ID` int NOT NULL AUTO_INCREMENT,
+            `NAME` varchar(255) NOT NULL,
+            `PASSWORD` varchar(255) NOT NULL,
+            `EMAIL` varchar(255) NOT NULL,
+            PRIMARY KEY (`ID`),
+            INDEX(ID)
+        )
+        """,
+        """
+        CREATE TABLE IF NOT EXISTS AUTH (
+            `NAME` varchar(255) NOT NULL,
+            `TOKEN` varchar(255) NOT NULL
+        )
+        """,
+        """
+        CREATE TABLE IF NOT EXISTS GAME (
+            `ID` int NOT NULL AUTO_INCREMENT,
+            `WHITENAME` varchar(255) NOT NULL,
+            `BLACKNAME` varchar(255) NOT NULL,
+            `GAMENAME` varchar(255) NOT NULL,
+            `JSON` TEXT NOT NULL,
+            PRIMARY KEY (`ID`),
+            INDEX(ID)
+        )
+        """
+    };
+
+    private void configureDatabase() throws ResponseException {
+        try {
+            DatabaseManager.createDatabase();
+            try (var conn = DatabaseManager.getConnection()) {
+                for (var statement : createStatements) {
+                    try (var preparedStatement = conn.prepareStatement(statement)) {
+                        preparedStatement.executeUpdate();
+                    }
+                }
+            } catch (SQLException ex) {
+                throw new ResponseException(500, String.format("Unable to configure database: %s", ex.getMessage()));
+            }
+        } catch (DataAccessException ex) {
+            throw new ResponseException(500, String.format("Unable to configure database: %s", ex.getMessage()));
+        }
     }
 }

@@ -1,8 +1,10 @@
 package Service;
 
 import dataAccess.AuthDAO;
+import dataAccess.DataAccessException;
 import dataAccess.GameDAO;
 import dataAccess.UserDAO;
+import exception.ResponseException;
 
 /**
  * Handles requests to clear the game
@@ -27,8 +29,12 @@ public class ClearService {
     /**
      * Clears the databases by calling each DAO's clear function
      */
-    public void clearDatabase() {
-        userDAO.clear();
+    public void clearDatabase() throws ResponseException {
+        try {
+            userDAO.clear();
+        } catch (DataAccessException e) {
+            throw new ResponseException(500, e.getMessage());
+        }
         authDAO.clear();
         gameDAO.clear();
     }

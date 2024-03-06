@@ -1,11 +1,14 @@
 package Service;
 
 import dataAccess.AuthDAO;
+import dataAccess.DataAccessException;
 import dataAccess.UserDAO;
 import exception.ResponseException;
 import handlers.RegistrationRequest;
 import model.AuthData;
 import model.UserData;
+
+import java.sql.SQLException;
 
 /**
  * Handles requests to register new users
@@ -43,13 +46,17 @@ public class RegistrationService {
 
 //        Make sure the username is unique
         UserData userData = new UserData(userRequest.username(), userRequest.password(), userRequest.email());
-        if (this.userDAO.isUser(userData)) {
-            throw new ResponseException(403, "error: already taken");
-        } else {
+        try {
+            if (this.userDAO.isUser(userData)) {
+                throw new ResponseException(403, "error: already taken");
+            } else {
 //            Add the user to the database if it's all new
-            this.userDAO.createUser(userData);
+                this.userDAO.createUser(userData);
 
-            return this.authDAO.createAuth(userData);
+                return this.authDAO.createAuth(userData);
+            }
+        } catch (DataAccessException e) {
+            throw new ResponseException(500, e.getMessage());
         }
     }
 

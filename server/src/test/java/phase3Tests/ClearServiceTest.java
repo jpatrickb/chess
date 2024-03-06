@@ -3,11 +3,13 @@ package phase3Tests;
 import Service.ClearService;
 import Service.GameService;
 import dataAccess.AuthDAO;
+import dataAccess.DataAccessException;
 import dataAccess.GameDAO;
 import dataAccess.UserDAO;
 import dataAccess.memory.MemoryAuthDAO;
 import dataAccess.memory.MemoryGameDAO;
 import dataAccess.memory.MemoryUserDAO;
+import exception.ResponseException;
 import handlers.CreateGameRequest;
 import model.AuthData;
 import model.UserData;
@@ -25,20 +27,33 @@ public class ClearServiceTest {
     void testClear() {
         UserData userData = new UserData("user", "pass", "email");
 
-        userDAO.createUser(userData);
-        AuthData authData = authDAO.createAuth(userData);
-        gameService.createGame(new CreateGameRequest("game"));
+        try {
+            userDAO.createUser(userData);
+            AuthData authData = authDAO.createAuth(userData);
+            gameService.createGame(new CreateGameRequest("game"));
 
 //        First show that everything is nonempty
-        Assertions.assertTrue(userDAO.isUser(userData));
+            Assertions.assertDoesNotThrow(() -> userDAO.isUser(userData));
+            try {
+                Assertions.assertTrue(userDAO.isUser(userData));
+            } catch (DataAccessException ex) {
+                Assertions.fail();
+            }
 
-        Assertions.assertEquals(authData, authDAO.getAuth(authData.authToken()));
+            Assertions.assertEquals(authData, authDAO.getAuth(authData.authToken()));
 
 //        Clear everything
-        service.clearDatabase();
+            service.clearDatabase();
 
 //        Make sure everything was cleared
-        Assertions.assertFalse(userDAO.isUser(userData));
-        Assertions.assertNull(authDAO.getAuth(authData.authToken()));
+            try {
+                Assertions.assertTrue(userDAO.isUser(userData));
+            } catch (DataAccessException ex) {
+                Assertions.fail();
+            }
+            Assertions.assertNull(authDAO.getAuth(authData.authToken()));
+        } catch (DataAccessException | ResponseException e) {
+            Assertions.fail();
+        }
     }
 }
