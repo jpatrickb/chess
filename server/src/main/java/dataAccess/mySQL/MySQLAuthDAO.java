@@ -27,7 +27,7 @@ public class MySQLAuthDAO implements AuthDAO {
 
     @Override
     public void clear() throws DataAccessException {
-        try (var preparedStatement = conn.prepareStatement("DELETE FROM USERS WHERE NAME!=''")) {
+        try (var preparedStatement = conn.prepareStatement("TRUNCATE TABLE AUTH")) {
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             throw new DataAccessException(e.getMessage());
@@ -85,8 +85,8 @@ public class MySQLAuthDAO implements AuthDAO {
     public boolean deleteAuth(String authToken) throws DataAccessException {
         try (var preparedStatement = conn.prepareStatement("DELETE FROM AUTH WHERE TOKEN=?")) {
             preparedStatement.setString(1, authToken);
-            preparedStatement.executeUpdate();
-            return true;
+            int rowsAffected = preparedStatement.executeUpdate();
+            return rowsAffected > 0;
         } catch (SQLException e) {
             throw new DataAccessException(e.getMessage());
         }

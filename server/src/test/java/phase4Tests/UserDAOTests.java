@@ -118,7 +118,11 @@ public class UserDAOTests {
 
     @Test
     void testGetBadUser() {
-        Assertions.assertThrows(DataAccessException.class, () -> userDAO.getUser("fakeName"));
+        try {
+            Assertions.assertNull(userDAO.getUser("fakeName"));
+        } catch (DataAccessException e) {
+            Assertions.fail();
+        }
     }
 
     @Test

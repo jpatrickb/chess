@@ -48,7 +48,7 @@ public class MySQLUserDAO implements UserDAO {
                     email = rs.getString("EMAIL");
                 }
                 if (Objects.equals(password, "") && Objects.equals(email, "")) {
-                    throw new DataAccessException("invalid name");
+                    return null;
                 }
                 return new UserData(username, password, email);
             }
@@ -72,7 +72,7 @@ public class MySQLUserDAO implements UserDAO {
 
     @Override
     public void clear() throws DataAccessException {
-        try (var preparedStatement = conn.prepareStatement("DELETE FROM USERS WHERE NAME!=''")) {
+        try (var preparedStatement = conn.prepareStatement("TRUNCATE TABLE USERS")) {
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             throw new DataAccessException(e.getMessage());

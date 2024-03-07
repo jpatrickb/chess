@@ -25,10 +25,10 @@ public class DataAccess {
             """
         CREATE TABLE IF NOT EXISTS GAME (
             `ID` int NOT NULL,
-            `WHITENAME` varchar(255) NOT NULL,
-            `BLACKNAME` varchar(255) NOT NULL,
+            `WHITENAME` varchar(255),
+            `BLACKNAME` varchar(255),
             `GAMENAME` varchar(255) NOT NULL,
-            `JSON` TEXT NOT NULL,
+            `JSON` TEXT NOT NULL
         )
         """
     };
