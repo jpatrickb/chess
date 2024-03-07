@@ -1,6 +1,7 @@
 package Service;
 
 import dataAccess.AuthDAO;
+import dataAccess.DataAccessException;
 import exception.ResponseException;
 import model.AuthData;
 
@@ -24,7 +25,7 @@ public class AuthenticationService {
      * @param authToken a String of the authToken provided in the HTTP header
      * @throws ResponseException Indicating that the authToken is not valid
      */
-    public boolean authenticate(String authToken) throws ResponseException {
+    public boolean authenticate(String authToken) throws ResponseException, DataAccessException {
         if (!this.authDAO.authExists(authToken)) {
             throw new ResponseException(401, "error: unauthorized");
         } else {
@@ -37,7 +38,7 @@ public class AuthenticationService {
      * @param authToken the String of an authToken
      * @return AuthData object associated
      */
-    public AuthData getAuthData(String authToken) {
+    public AuthData getAuthData(String authToken) throws DataAccessException {
         return authDAO.getAuth(authToken);
     }
 }
