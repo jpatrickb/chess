@@ -1,13 +1,12 @@
 package dataAccess;
 import model.UserData;
 
-import java.sql.SQLException;
 
 public interface UserDAO {
 
     boolean isUser(UserData userData) throws DataAccessException;
 
-    UserData getUser(String username);
+    UserData getUser(String username) throws DataAccessException;
 
     void createUser(UserData userData) throws DataAccessException;
 
