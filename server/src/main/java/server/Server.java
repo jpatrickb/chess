@@ -1,10 +1,10 @@
 package server;
 
 import com.google.gson.Gson;
-import dataAccess.AuthDAO;
-import dataAccess.DataAccess;
-import dataAccess.GameDAO;
-import dataAccess.UserDAO;
+import dataAccess.*;
+import dataAccess.mySQL.MySQLAuthDAO;
+import dataAccess.mySQL.MySQLGameDAO;
+import dataAccess.mySQL.MySQLUserDAO;
 import exception.ErrorMessage;
 import exception.ResponseException;
 import handlers.*;
@@ -34,14 +34,9 @@ public class Server {
 
     public Server() {
         try {
-//            This line is to use the memory data access
-//            DataAccess dataAccess = new DataAccess(DataAccess.DataLocation.MEMORY);
-
-//            This line is to use the SQL data access
-            DataAccess dataAccess = new DataAccess(DataAccess.DataLocation.SQL);
-            AuthDAO authDAO = dataAccess.getAuthDAO();
-            UserDAO userDAO = dataAccess.getUserDAO();
-            GameDAO gameDAO = dataAccess.getGameDAO();
+            AuthDAO authDAO = new MySQLAuthDAO();
+            UserDAO userDAO = new MySQLUserDAO();
+            GameDAO gameDAO = new MySQLGameDAO();
 
             registrationService = new RegistrationService(userDAO, authDAO);
             loginService = new LoginService(userDAO, authDAO);
@@ -74,14 +69,20 @@ public class Server {
 
         Spark.delete("/db", this::clearApp);
 
-        Spark.exception(ResponseException.class, this::exceptionHandler);
+        Spark.exception(ResponseException.class, this::responseExceptionHandler);
+        Spark.exception(DataAccessException.class, this::dataExceptionHandler);
 
         Spark.awaitInitialization();
         return Spark.port();
     }
 
-    private void exceptionHandler(ResponseException e, Request request, Response response) {
+    private void responseExceptionHandler(ResponseException e, Request request, Response response) {
         response.status(e.getStatusCode());
+        response.body(new Gson().toJson(new ErrorMessage(e.getMessage())));
+    }
+
+    private void dataExceptionHandler(DataAccessException e, Request request, Response response) {
+        response.status(500);
         response.body(new Gson().toJson(new ErrorMessage(e.getMessage())));
     }
 
@@ -118,7 +119,7 @@ public class Server {
      * @return JSON of the authorization data upon successful login
      * @throws ResponseException if unsuccessful log in, indicating incorrect password or other errors
      */
-    private Object loginUser(Request request, Response response) throws ResponseException {
+    private Object loginUser(Request request, Response response) throws ResponseException, DataAccessException {
         response.type("application/json");
 
         var user = new Gson().fromJson(request.body(), LoginRequest.class);
@@ -136,9 +137,10 @@ public class Server {
      * @return Nothing
      * @throws ResponseException If user is unauthorized to log out, or other errors
      */
-    private Object logoutUser(Request request, Response response) throws ResponseException {
+    private Object logoutUser(Request request, Response response) throws ResponseException, DataAccessException {
         response.type("application/json");
         var authToken = new LogoutRequest(request.headers("authorization"));
+        authService.authenticate(authToken.authToken());
 
         logoutService.logoutUser(authToken);
         response.status(200);
@@ -152,7 +154,7 @@ public class Server {
      * @return JSON containing a collection of the games
      * @throws ResponseException If user is unauthorized
      */
-    private Object getGames(Request request, Response response) throws ResponseException {
+    private Object getGames(Request request, Response response) throws ResponseException, DataAccessException {
         var authToken = request.headers("authorization");
         authService.authenticate(authToken);
 
@@ -170,7 +172,7 @@ public class Server {
      * @return Nothing
      * @throws ResponseException If the user is unauthorized
      */
-    private Object joinGame(Request request, Response response) throws ResponseException {
+    private Object joinGame(Request request, Response response) throws ResponseException, DataAccessException {
         var authToken = request.headers("authorization");
         authService.authenticate(authToken);
 
@@ -190,7 +192,7 @@ public class Server {
      * @return JSON containing gameID of the game created
      * @throws ResponseException If the user is unauthorized
      */
-    private Object createGame(Request request, Response response) throws ResponseException {
+    private Object createGame(Request request, Response response) throws ResponseException, DataAccessException {
         var authToken = request.headers("authorization");
         authService.authenticate(authToken);
 
@@ -210,7 +212,7 @@ public class Server {
      * @param response HTTP Response
      * @return Nothing
      */
-    private Object clearApp(Request request, Response response) throws ResponseException {
+    private Object clearApp(Request request, Response response) throws ResponseException, DataAccessException {
         clearService.clearDatabase();
         response.status(200);
         return "";
