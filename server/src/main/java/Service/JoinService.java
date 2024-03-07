@@ -62,7 +62,7 @@ public class JoinService {
                 game.gameName(),
                 game.game());
 
-        gameDAO.updateGame(request.gameID(), newGame);
+        gameDAO.updateGame(newGame);
     }
 
 }

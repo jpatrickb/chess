@@ -50,11 +50,10 @@ public class MemoryGameDAO implements GameDAO {
 
     /**
      * Updates a specified game
-     * @param gameID the gameID of the game to update
      * @param gameData GameData object containing the updated game
      */
     @Override
-    public void updateGame(Integer gameID, GameData gameData) {
-        gameList.put(gameID, gameData);
+    public void updateGame(GameData gameData) {
+        gameList.put(gameData.gameID(), gameData);
     }
 }

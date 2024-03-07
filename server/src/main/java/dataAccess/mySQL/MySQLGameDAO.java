@@ -139,12 +139,11 @@ public class MySQLGameDAO implements GameDAO {
 
     /**
      * Updates a game using new information for the game
-     * @param gameID the ID of the game to change
      * @param newGame GameData object containing data for the new game
      * @throws DataAccessException if anything fails
      */
     @Override
-    public void updateGame(Integer gameID, GameData newGame) throws DataAccessException {
+    public void updateGame(GameData newGame) throws DataAccessException {
         try (var preparedStatement = conn.prepareStatement(
                 "UPDATE GAME SET WHITENAME=?, BLACKNAME=?, GAMENAME=?, JSON=? WHERE ID=?")) {
             preparedStatement.setString(1, newGame.whiteUsername());
