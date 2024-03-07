@@ -1,5 +1,6 @@
 package Service;
 
+import dataAccess.DataAccessException;
 import dataAccess.GameDAO;
 import model.GameData;
 import model.GameResponseData;
@@ -26,7 +27,7 @@ public class ListService {
      * Contains only the gameID, player usernames, and gameName (not the ChessGame object)
      * @return Collection of GameResponseData containing data for all the games
      */
-    public Collection<GameResponseData> getGames() {
+    public Collection<GameResponseData> getGames() throws DataAccessException {
         Collection<GameData> allGames = gameDAO.listGames();
         Collection<GameResponseData> gameResponseData = new HashSet<>();
         for (var game : allGames) {

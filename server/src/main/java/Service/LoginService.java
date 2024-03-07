@@ -1,6 +1,7 @@
 package Service;
 
 import dataAccess.AuthDAO;
+import dataAccess.DataAccessException;
 import dataAccess.UserDAO;
 import exception.ResponseException;
 import handlers.LoginRequest;
@@ -34,7 +35,7 @@ public class LoginService {
      * @return AuthData object containing the username and authToken created upon login
      * @throws ResponseException indicating that the user is unauthorized (if password is incorrect)
      */
-    public AuthData login(LoginRequest loginRequest) throws ResponseException {
+    public AuthData login(LoginRequest loginRequest) throws ResponseException, DataAccessException {
         UserData userData = this.userDAO.getUser(loginRequest.username());
         if (userData == null) {
             throw new ResponseException(401, "error: unauthorized");

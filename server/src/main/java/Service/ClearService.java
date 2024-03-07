@@ -29,12 +29,8 @@ public class ClearService {
     /**
      * Clears the databases by calling each DAO's clear function
      */
-    public void clearDatabase() throws ResponseException {
-        try {
-            userDAO.clear();
-        } catch (DataAccessException e) {
-            throw new ResponseException(500, e.getMessage());
-        }
+    public void clearDatabase() throws ResponseException, DataAccessException {
+        userDAO.clear();
         authDAO.clear();
         gameDAO.clear();
     }
