@@ -1,5 +1,6 @@
 package Service;
 
+import dataAccess.DataAccessException;
 import dataAccess.GameDAO;
 import exception.ResponseException;
 import handlers.JoinGameRequest;
@@ -29,7 +30,7 @@ public class JoinService {
      * @param authData AuthData object used to get the player's username
      * @throws ResponseException if (a) game doesn't exist, (b) color is already taken, or (c) color is invalid
      */
-    public void joinGame(JoinGameRequest request, AuthData authData) throws ResponseException {
+    public void joinGame(JoinGameRequest request, AuthData authData) throws ResponseException, DataAccessException {
 //        Ensures that the game with the requested ID exists
         GameData game = gameDAO.getGame(request.gameID());
         if (game == null) {

@@ -4,6 +4,7 @@ import dataAccess.AuthDAO;
 import dataAccess.DataAccessException;
 import exception.ResponseException;
 import handlers.LogoutRequest;
+import model.AuthData;
 
 /**
  * Handles requests to log a user out
@@ -24,9 +25,17 @@ public class LogoutService {
      * @param authToken LogoutRequest object containing a string with the authToken of the user to be logged out
      * @throws ResponseException Indicates that the user is not authorized (provided invalid authToken)
      */
-    public void logoutUser(LogoutRequest authToken) throws ResponseException, DataAccessException {
-        boolean removed = authDAO.deleteAuth(authToken.authToken());
-        if (!removed) {
+    public void logoutUser(LogoutRequest authToken) throws ResponseException {
+        try {
+            AuthData authData = authDAO.getAuth(authToken.authToken());
+            if (authData == null) {
+                throw new ResponseException(401, "error: unauthorized");
+            }
+            boolean removed = authDAO.deleteAuth(authData.authToken());
+            if (!removed) {
+                throw new ResponseException(401, "error: unauthorized");
+            }
+        } catch (DataAccessException e) {
             throw new ResponseException(401, "error: unauthorized");
         }
     }

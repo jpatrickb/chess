@@ -1,6 +1,7 @@
 package Service;
 
 import chess.ChessGame;
+import dataAccess.DataAccessException;
 import dataAccess.GameDAO;
 import handlers.CreateGameRequest;
 import model.GameData;
@@ -29,7 +30,7 @@ public class GameService {
      * @param newGame an object containing the name of the new game
      * @return GameID object containing the gameID for the new game
      */
-    public GameID createGame(CreateGameRequest newGame) {
+    public GameID createGame(CreateGameRequest newGame) throws DataAccessException {
 //        Generate the game ID
         Random random = new Random();
         int gameID = random.nextInt(1000000);

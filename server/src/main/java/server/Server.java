@@ -144,7 +144,7 @@ public class Server {
 
         logoutService.logoutUser(authToken);
         response.status(200);
-        return "";
+        return "{}";
     }
 
     /**
@@ -182,7 +182,7 @@ public class Server {
 
         joinService.joinGame(joinInfo, authData);
         response.status(200);
-        return "";
+        return "{}";
     }
 
     /**
@@ -202,8 +202,6 @@ public class Server {
         response.status(200);
         response.body(new Gson().toJson(gameID));
         return new Gson().toJson(gameID);
-
-
     }
 
     /**
@@ -215,6 +213,6 @@ public class Server {
     private Object clearApp(Request request, Response response) throws ResponseException, DataAccessException {
         clearService.clearDatabase();
         response.status(200);
-        return "";
+        return "{}";
     }
 }
