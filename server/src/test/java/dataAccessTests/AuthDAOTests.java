@@ -1,4 +1,4 @@
-package phase4Tests;
+package dataAccessTests;
 
 import dataAccess.AuthDAO;
 import dataAccess.DataAccessException;

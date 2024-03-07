@@ -1,4 +1,4 @@
-package phase4Tests;
+package dataAccessTests;
 
 import chess.ChessGame;
 import dataAccess.DataAccessException;
