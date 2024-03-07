@@ -1,6 +1,7 @@
 package phase3Tests;
 
 import Service.AuthenticationService;
+import dataAccess.DataAccessException;
 import dataAccess.memory.MemoryAuthDAO;
 import exception.ResponseException;
 import model.AuthData;
@@ -20,7 +21,7 @@ public class AuthenticationServiceTest {
 
 
     @Test
-    void testAuthenticate() throws ResponseException {
+    void testAuthenticate() throws ResponseException, DataAccessException {
         UserData userData = new UserData("patrick", "12345", "test@email.com");
 
         AuthData authData = authDAO.createAuth(userData);
@@ -32,7 +33,7 @@ public class AuthenticationServiceTest {
     }
 
     @Test
-    void testGetAuthData() {
+    void testGetAuthData() throws DataAccessException {
         UserData userData = new UserData("patrick", "12345", "test@email.com");
 
         AuthData authData = authDAO.createAuth(userData);
