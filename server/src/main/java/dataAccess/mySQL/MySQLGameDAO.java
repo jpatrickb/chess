@@ -17,6 +17,11 @@ import java.util.HashSet;
 public class MySQLGameDAO implements GameDAO {
     private final Connection conn;
 
+    /**
+     * Constructor for the SQL GameDAO
+     * Connects to the database
+     * @throws ResponseException if can't connect
+     */
     public MySQLGameDAO() throws ResponseException {
         DataAccess.configureDatabase();
         try {
@@ -25,6 +30,11 @@ public class MySQLGameDAO implements GameDAO {
             throw new ResponseException(500, e.getMessage());
         }
     }
+
+    /**
+     * Clears the entire database
+     * @throws DataAccessException if fails to clear
+     */
     @Override
     public void clear() throws DataAccessException {
         try (var preparedStatement = conn.prepareStatement("TRUNCATE TABLE GAME")) {
@@ -34,6 +44,11 @@ public class MySQLGameDAO implements GameDAO {
         }
     }
 
+    /**
+     * Adds a game to the database
+     * @param gameData object with the data of the game to be stored
+     * @throws DataAccessException If anything fails while storing
+     */
     @Override
     public void addGame(GameData gameData) throws DataAccessException {
         try (var preparedStatement = conn.prepareStatement("INSERT INTO GAME (ID, WHITENAME, BLACKNAME, GAMENAME, JSON) VALUES(?, ?, ?, ?, ?)")) {
@@ -49,6 +64,12 @@ public class MySQLGameDAO implements GameDAO {
         }
     }
 
+    /**
+     * Gets a game given a specified gameID
+     * @param gameID the ID of the desired games
+     * @return GameData object of the game with the given ID
+     * @throws DataAccessException if anything fails
+     */
     @Override
     public GameData getGame(int gameID) throws DataAccessException {
         try (var preparedStatement = conn.prepareStatement("SELECT * from GAME where ID=?")) {
@@ -79,6 +100,11 @@ public class MySQLGameDAO implements GameDAO {
         }
     }
 
+    /**
+     * Lists all the games in the database
+     * @return Collection of all the games
+     * @throws DataAccessException if anything fails
+     */
     @Override
     public Collection<GameData> listGames() throws DataAccessException {
         Collection<GameData> gameList = new HashSet<>();
@@ -111,8 +137,14 @@ public class MySQLGameDAO implements GameDAO {
         return gameList;
     }
 
+    /**
+     * Updates a game using new information for the game
+     * @param gameID the ID of the game to change
+     * @param newGame GameData object containing data for the new game
+     * @throws DataAccessException if anything fails
+     */
     @Override
-    public void updateGame(Integer integer, GameData newGame) throws DataAccessException {
+    public void updateGame(Integer gameID, GameData newGame) throws DataAccessException {
         try (var preparedStatement = conn.prepareStatement(
                 "UPDATE GAME SET WHITENAME=?, BLACKNAME=?, GAMENAME=?, JSON=? WHERE ID=?")) {
             preparedStatement.setString(1, newGame.whiteUsername());

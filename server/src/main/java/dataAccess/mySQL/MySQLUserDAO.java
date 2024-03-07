@@ -11,9 +11,16 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Objects;
 
+/**
+ * Class to provide access to the database for UserData
+ */
 public class MySQLUserDAO implements UserDAO {
     private final Connection conn;
 
+    /**
+     * Connects to the database
+     * @throws ResponseException if connection fails
+     */
     public MySQLUserDAO() throws ResponseException {
         DataAccess.configureDatabase();
         try {
@@ -23,7 +30,12 @@ public class MySQLUserDAO implements UserDAO {
         }
     }
 
-
+    /**
+     * Checks whether a given user exists in the database
+     * @param userData object containing information on the user
+     * @return true if the user exists/false if they don't
+     * @throws DataAccessException if anything fails
+     */
     @Override
     public boolean isUser(UserData userData) throws DataAccessException {
         try (var preparedStatement = conn.prepareStatement("SELECT NAME FROM USERS WHERE NAME=?")) {
@@ -36,6 +48,12 @@ public class MySQLUserDAO implements UserDAO {
         }
     }
 
+    /**
+     * Gets the UserData object associated with a given username
+     * @param username username to search for
+     * @return UserData object containing all the user's data
+     * @throws DataAccessException if anything fails
+     */
     @Override
     public UserData getUser(String username) throws DataAccessException {
         try (var preparedStatement = conn.prepareStatement("SELECT PASSWORD, EMAIL from USERS where NAME=?")) {
@@ -57,6 +75,11 @@ public class MySQLUserDAO implements UserDAO {
         }
     }
 
+    /**
+     * Creates a user using the data given
+     * @param userData the data to add to the database
+     * @throws DataAccessException if anything fails
+     */
     @Override
     public void createUser(UserData userData) throws DataAccessException {
         try (var preparedStatement = conn.prepareStatement("INSERT INTO USERS (NAME, PASSWORD, EMAIL) VALUE(?, ?, ?)")) {
@@ -70,6 +93,10 @@ public class MySQLUserDAO implements UserDAO {
         }
     }
 
+    /**
+     * Clears the entire database
+     * @throws DataAccessException if anything fails
+     */
     @Override
     public void clear() throws DataAccessException {
         try (var preparedStatement = conn.prepareStatement("TRUNCATE TABLE USERS")) {
