@@ -1,7 +1,10 @@
 package phase3Tests;
 
 import Service.LogoutService;
+import dataAccess.AuthDAO;
+import dataAccess.DataAccessException;
 import dataAccess.memory.MemoryAuthDAO;
+import dataAccess.mySQL.MySQLAuthDAO;
 import exception.ResponseException;
 import handlers.LogoutRequest;
 import model.AuthData;
@@ -11,11 +14,20 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class LogoutServiceTest {
-    static final MemoryAuthDAO authDAO = new MemoryAuthDAO();
+    static final AuthDAO authDAO;
+    static {
+        AuthDAO authDAO1;
+        try {
+            authDAO1 = new MySQLAuthDAO();
+        } catch (ResponseException ignore) {
+            authDAO1 = new MemoryAuthDAO();
+        }
+        authDAO = authDAO1;
+    }
     static final LogoutService service = new LogoutService(authDAO);
 
     @BeforeEach
-    void clear() {
+    void clear() throws DataAccessException {
         authDAO.clear();
     }
 
@@ -29,9 +41,15 @@ public class LogoutServiceTest {
     void testLogoutUserValid() {
         UserData userData = new UserData("realUser", "realPassword", "email@email.com");
 
-        AuthData authData = authDAO.createAuth(userData);
+        AuthData authData = null;
+        try {
+            authData = authDAO.createAuth(userData);
+        } catch (DataAccessException e) {
+            Assertions.fail();
+        }
 
 //        Test that a user currently logged in actually can log in
-        Assertions.assertDoesNotThrow(() -> service.logoutUser(new LogoutRequest(authData.authToken())));
+        AuthData finalAuthData = authData;
+        Assertions.assertDoesNotThrow(() -> service.logoutUser(new LogoutRequest(finalAuthData.authToken())));
     }
 }

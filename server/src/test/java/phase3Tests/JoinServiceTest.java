@@ -2,6 +2,7 @@ package phase3Tests;
 
 import Service.GameService;
 import Service.JoinService;
+import dataAccess.DataAccessException;
 import dataAccess.memory.MemoryGameDAO;
 import exception.ResponseException;
 import handlers.CreateGameRequest;
@@ -24,20 +25,31 @@ public class JoinServiceTest {
 
     @Test
     void testJoinGameBad() {
-        GameID gameID = gameService.createGame(new CreateGameRequest("testGame"));
+        try {
+            GameID gameID;
+            gameID = gameService.createGame(new CreateGameRequest("testGame"));
 
-        AuthData authData = new AuthData("testUser", "12345");
+            AuthData authData = new AuthData("testUser", "12345");
 
 //        Test handling invalid game passed in
-        Assertions.assertThrows(ResponseException.class, () -> service.joinGame(new JoinGameRequest("BLACK", 5), authData));
+            Assertions.assertThrows(ResponseException.class, () -> service.joinGame(new JoinGameRequest("BLACK", 5), authData));
 
 //        Test bad color
-        Assertions.assertThrows(ResponseException.class, () -> service.joinGame(new JoinGameRequest("green", gameID.gameID()), authData));
+            GameID finalGameID = gameID;
+            Assertions.assertThrows(ResponseException.class, () -> service.joinGame(new JoinGameRequest("green", finalGameID.gameID()), authData));
+        } catch (DataAccessException e) {
+            Assertions.fail();
+        }
     }
 
     @Test
     void testJoinGameGood() {
-        GameID gameID = gameService.createGame(new CreateGameRequest("testGame"));
+        GameID gameID = null;
+        try {
+            gameID = gameService.createGame(new CreateGameRequest("testGame"));
+        } catch (DataAccessException e) {
+            Assertions.fail();
+        }
         JoinGameRequest req = new JoinGameRequest("WHITE", gameID.gameID());
 
         AuthData authData = new AuthData("testUser", "12345");

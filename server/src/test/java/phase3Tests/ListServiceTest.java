@@ -31,9 +31,13 @@ public class ListServiceTest {
 
     @Test
     void testGetGamesNonEmpty() {
-        gameService.createGame(new CreateGameRequest("game1"));
-        gameService.createGame(new CreateGameRequest("game2"));
-        gameService.createGame(new CreateGameRequest("game3"));
+        try {
+            gameService.createGame(new CreateGameRequest("game1"));
+            gameService.createGame(new CreateGameRequest("game2"));
+            gameService.createGame(new CreateGameRequest("game3"));
+        } catch (DataAccessException e) {
+            Assertions.fail();
+        }
 
 //        Test that there are the correct number of games
         try {

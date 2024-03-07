@@ -47,7 +47,7 @@ public class ClearServiceTest {
 
 //        Make sure everything was cleared
             try {
-                Assertions.assertTrue(userDAO.isUser(userData));
+                Assertions.assertFalse(userDAO.isUser(userData));
             } catch (DataAccessException ex) {
                 Assertions.fail();
             }

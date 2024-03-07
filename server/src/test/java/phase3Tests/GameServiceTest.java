@@ -1,6 +1,7 @@
 package phase3Tests;
 
 import Service.GameService;
+import dataAccess.DataAccessException;
 import dataAccess.memory.MemoryGameDAO;
 import handlers.CreateGameRequest;
 import model.GameID;
@@ -21,7 +22,12 @@ public class GameServiceTest {
     void testCreateGameNotNull() {
         CreateGameRequest newGame = new CreateGameRequest("testGame");
 
-        GameID gameID = service.createGame(newGame);
+        GameID gameID = null;
+        try {
+            gameID = service.createGame(newGame);
+        } catch (DataAccessException e) {
+            Assertions.fail();
+        }
 
 //        Positive test case (asserting that trying to get the game returns a valid game and not null)
         Assertions.assertNotNull(gameDAO.getGame(gameID.gameID()));
