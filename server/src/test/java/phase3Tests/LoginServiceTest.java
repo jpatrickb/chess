@@ -1,6 +1,7 @@
 package phase3Tests;
 
 import Service.LoginService;
+import dataAccess.DataAccessException;
 import dataAccess.memory.MemoryAuthDAO;
 import dataAccess.memory.MemoryUserDAO;
 import exception.ResponseException;
@@ -29,7 +30,7 @@ public class LoginServiceTest {
     }
 
     @Test
-    void testLoginValid() throws ResponseException {
+    void testLoginValid() throws ResponseException, DataAccessException {
 
 
         UserData userData = new UserData("realName", "realPassword", "realEmail@email.com");

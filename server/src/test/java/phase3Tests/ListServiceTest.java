@@ -2,6 +2,7 @@ package phase3Tests;
 
 import Service.GameService;
 import Service.ListService;
+import dataAccess.DataAccessException;
 import dataAccess.memory.MemoryGameDAO;
 import handlers.CreateGameRequest;
 import org.junit.jupiter.api.Assertions;
@@ -21,7 +22,11 @@ public class ListServiceTest {
     @Test
     void testGetGamesEmpty() {
 //        Test that there are currently no games
-        Assertions.assertTrue(service.getGames().isEmpty());
+        try {
+            Assertions.assertTrue(service.getGames().isEmpty());
+        } catch (DataAccessException e) {
+            Assertions.fail();
+        }
     }
 
     @Test
@@ -31,6 +36,10 @@ public class ListServiceTest {
         gameService.createGame(new CreateGameRequest("game3"));
 
 //        Test that there are the correct number of games
-        Assertions.assertEquals(3, service.getGames().size());
+        try {
+            Assertions.assertEquals(3, service.getGames().size());
+        } catch (DataAccessException e) {
+            Assertions.fail();
+        }
     }
 }
