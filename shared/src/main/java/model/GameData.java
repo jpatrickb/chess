@@ -12,7 +12,7 @@ import java.util.Objects;
  * @param gameName String - name of the current game
  * @param game ChessGame - contains the current game state
  */
-public record GameData(int gameID, String whiteUsername, String blackUsername, String gameName, ChessGame game) {
+public record GameData(Integer gameID, String whiteUsername, String blackUsername, String gameName, ChessGame game) {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

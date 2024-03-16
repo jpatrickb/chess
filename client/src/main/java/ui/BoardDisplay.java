@@ -9,6 +9,7 @@ public class BoardDisplay {
     private static final int BOARD_SIZE_IN_SQUARES = 8;
     private static final int SQUARE_SIZE_IN_CHARS = 1;
     private static final int LINE_WIDTH_IN_CHARS = 1;
+    private static final String[] HEADERS = {" a ", " b ", " c ", " d ", " e ", " f ", " g ", " h "};
 
 
     public static void main(String[] args) {
@@ -20,7 +21,7 @@ public class BoardDisplay {
 
         drawChessBoard(out);
 
-        out.print(SET_BG_COLOR_BLACK);
+        out.print(SET_BG_COLOR_WHITE);
         out.print(SET_TEXT_COLOR_WHITE);
     }
 
@@ -28,12 +29,11 @@ public class BoardDisplay {
 
         setBlack(out);
 
-        String[] headers = {" a ", " b ", " c ", " d ", " e ", " f ", " g ", " h "};
         out.print(SET_BG_COLOR_LIGHT_GREY);
 
         out.print(EMPTY.repeat(LINE_WIDTH_IN_CHARS));
         for (int boardCol = 0; boardCol < BOARD_SIZE_IN_SQUARES; ++boardCol) {
-            printHeaderText(out, headers[boardCol]);
+            printHeaderText(out, HEADERS[boardCol]);
 
         }
         out.print(SET_BG_COLOR_LIGHT_GREY);
@@ -55,6 +55,7 @@ public class BoardDisplay {
     }
 
     private static void drawChessBoard(PrintStream out) {
+//        TODO: Figure out how to print the board both directions
     }
 
     private static void setWhite(PrintStream out) {
