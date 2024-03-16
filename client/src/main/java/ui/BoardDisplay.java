@@ -33,7 +33,7 @@ public class BoardDisplay {
 
         out.print(EMPTY.repeat(LINE_WIDTH_IN_CHARS));
         for (int boardCol = 0; boardCol < BOARD_SIZE_IN_SQUARES; ++boardCol) {
-            drawHeader(out, headers[boardCol]);
+            printHeaderText(out, headers[boardCol]);
 
         }
         out.print(SET_BG_COLOR_LIGHT_GREY);
@@ -41,10 +41,10 @@ public class BoardDisplay {
 
         out.println();
     }
-
-    private static void drawHeader(PrintStream out, String header) {
-        printHeaderText(out, header);
-    }
+//
+//    private static void drawHeader(PrintStream out, String header) {
+//        printHeaderText(out, header);
+//    }
 
     private static void printHeaderText(PrintStream out, String player) {
         out.print(SET_BG_COLOR_LIGHT_GREY);

@@ -10,22 +10,33 @@ import java.net.*;
 
 public class ServerFacade {
     private final String serverUrl;
+    private String authToken;
     public ServerFacade(String url) {
         serverUrl = url;
     }
 
     public AuthData registerUser(UserData userData) throws ResponseException {
         var path = "/user";
-        return this.makeRequest("POST", path, userData, AuthData.class);
+        AuthData authData = this.makeRequest("POST", path, userData, AuthData.class);
+        if (authData != null) {
+            authToken = authData.authToken();
+        }
+        return authData;
     }
 
     public AuthData loginUser(UserData userData) throws ResponseException {
         var path = "/session";
-        return this.makeRequest("POST", path, userData, AuthData.class);
+        AuthData authData = this.makeRequest("POST", path, userData, AuthData.class);
+        if (authData != null) {
+            authToken = authData.authToken();
+        }
+        return authData;
     }
 
-    public void logoutUser() {
-
+    public void logoutUser() throws ResponseException {
+        var path = "/session";
+        this.makeRequest("DELETE", path, null, null);
+        authToken = null;
     }
 
     private <T> T makeRequest (String method, String path, Object request, Class<T> responseClass) throws ResponseException {
@@ -34,6 +45,10 @@ public class ServerFacade {
             HttpURLConnection http = (HttpURLConnection) url.openConnection();
             http.setRequestMethod(method);
             http.setDoOutput(true);
+
+            if (authToken != null) {
+                http.setRequestProperty("authorization", authToken);
+            }
 
             writeBody(request, http);
             http.connect();

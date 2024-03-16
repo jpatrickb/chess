@@ -10,7 +10,7 @@ import java.util.Arrays;
 
 public class Client {
     private final Repl repl;
-    private State state = State.LOGGED_OUT;
+    public static State state = State.LOGGED_OUT;
     private UserData userData;
     private final ServerFacade server;
     private final String serverUrl;
@@ -77,8 +77,10 @@ public class Client {
         return null;
     }
 
-    private String logout() {
-        return null;
+    private String logout() throws ResponseException {
+        state = State.LOGGED_OUT;
+        server.logoutUser();
+        return "Logged out user";
     }
 
     private String register(String[] params) throws ResponseException {
@@ -86,7 +88,7 @@ public class Client {
             UserData userData = new UserData(params[0], params[1], params[2]);
             AuthData authData = server.registerUser(userData);
             state = State.LOGGED_IN;
-            return new Gson().toJson(authData);
+            return "Logged in as " + authData.username();
         }
         throw new ResponseException(400, "error: bad request");
     }
@@ -96,7 +98,7 @@ public class Client {
             userData = new UserData(params[0], params[1], null);
             AuthData authData = server.loginUser(userData);
             state = State.LOGGED_IN;
-            return new Gson().toJson(authData);
+            return "Logged in as " + authData.username();
         }
         throw new ResponseException(400, "error: unauthorized");
     }

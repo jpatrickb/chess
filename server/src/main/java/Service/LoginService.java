@@ -41,7 +41,6 @@ public class LoginService {
             throw new ResponseException(401, "error: unauthorized");
         }
         boolean removed = this.authDAO.deleteAuth(userData.username());
-        System.out.println(removed);
         if (Objects.equals(userData.password(), loginRequest.password())) {
             return this.authDAO.createAuth(userData);
         } else {
