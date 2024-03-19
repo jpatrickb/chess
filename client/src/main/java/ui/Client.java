@@ -2,7 +2,6 @@ package ui;
 
 import chess.ChessBoard;
 import chess.ChessGame;
-import com.google.gson.Gson;
 import exception.ResponseException;
 import model.*;
 import server.ServerFacade;
@@ -13,19 +12,31 @@ import java.util.Objects;
 
 import static ui.EscapeSequences.*;
 
+/**
+ * The Client class represents the interface for interacting with the server and managing the chess game.
+ */
 public class Client {
-    private final Repl repl;
     public static State state = State.LOGGED_OUT;
-    private UserData userData;
     private final ServerFacade server;
-    private final String serverUrl;
+    private final Repl repl;
 
+    /**
+     * Constructs a Client object with the specified server URL and REPL interface.
+     *
+     * @param serverUrl The URL of the server.
+     * @param repl      The REPL interface.
+     */
     public Client(String serverUrl, Repl repl) {
         server = new ServerFacade(serverUrl);
-        this.serverUrl = serverUrl;
         this.repl = repl;
     }
 
+    /**
+     * Evaluates the input command and executes the corresponding action.
+     *
+     * @param input The input command.
+     * @return The result of the evaluation.
+     */
     public String eval(String input) {
         try {
             var tokens = input.toLowerCase().split(" ");
@@ -37,8 +48,8 @@ public class Client {
                 case "logout" -> logout();
                 case "create" -> createGame(params);
                 case "list" -> listGames();
-                case "join" -> joinGame(params);
-                case "observe" -> joinGame(params);
+                case "join", "observe" -> joinGame(params);
+                case "cleardb" -> clearDataBase();
                 case "quit" -> "quit";
                 default -> help();
             };
@@ -47,6 +58,11 @@ public class Client {
         }
     }
 
+    /**
+     * Provides help information about available commands.
+     *
+     * @return Help information about available commands.
+     */
     public String help() {
         String[] commands = {"create <NAME>", "list", "join <ID> [WHITE|BLACK|<empty>]", "observe <ID>", "logout", "quit", "help"};
         String[] description = {"create a game with specified name",
@@ -72,6 +88,13 @@ public class Client {
         return response.toString();
     }
 
+    /**
+     * Joins a game with the specified parameters, either as a player or an observer.
+     *
+     * @param params The parameters for joining the game, including the game ID and optionally the desired color (WHITE or BLACK).
+     * @return An empty string if the operation is successful.
+     * @throws ResponseException if the server responds with an error.
+     */
     private String joinGame(String[] params) throws ResponseException {
         if (params.length == 1) {
             server.joinGame(new JoinRequest(Integer.parseInt(params[0]), null));
@@ -93,29 +116,51 @@ public class Client {
         throw new ResponseException(400, "error: bad request");
     }
 
-    private String observeGame(String[] params) {
-        return null;
-    }
-
+    /**
+     * Retrieves a collection of available games from the server.
+     *
+     * @return A string representation of the list of available games.
+     * @throws ResponseException if the server responds with an error.
+     */
     private String listGames() throws ResponseException {
         Collection<GameResponseData> allGames = server.listGames();
         return buildGameList(allGames);
     }
 
+    /**
+     * Creates a new game with the specified name.
+     *
+     * @param params The parameters for creating the game, including the name of the game.
+     * @return A message indicating the successful creation of the game.
+     * @throws ResponseException if the server responds with an error.
+     */
     private String createGame(String[] params) throws ResponseException {
         if (params.length == 1) {
             GameID gameID = server.createGame(new GameName(params[0]));
-            return "Game " + params[0] + " created with ID " + Integer.toString(gameID.gameID());
+            return "Game " + params[0] + " created with ID " + gameID.gameID();
         }
         throw new ResponseException(400, "error: bad request");
     }
 
+    /**
+     * Logs out the currently authenticated user.
+     *
+     * @return A message indicating successful logout.
+     * @throws ResponseException if the server responds with an error.
+     */
     private String logout() throws ResponseException {
         state = State.LOGGED_OUT;
         server.logoutUser();
         return "Logged out user";
     }
 
+    /**
+     * Registers a new user with the specified user data.
+     *
+     * @param params The parameters for registering a user, including username, password, and email.
+     * @return A message indicating successful registration and login.
+     * @throws ResponseException if the server responds with an error.
+     */
     private String register(String[] params) throws ResponseException {
         if (params.length == 3) {
             UserData userData = new UserData(params[0], params[1], params[2]);
@@ -126,9 +171,16 @@ public class Client {
         throw new ResponseException(400, "error: bad request");
     }
 
+    /**
+     * Logs in a user with the specified user data.
+     *
+     * @param params The parameters for logging in a user, including username and password.
+     * @return A message indicating successful login.
+     * @throws ResponseException if the server responds with an error.
+     */
     private String login(String[] params) throws ResponseException {
         if (params.length == 2) {
-            userData = new UserData(params[0], params[1], null);
+            UserData userData = new UserData(params[0], params[1], null);
             AuthData authData = server.loginUser(userData);
             state = State.LOGGED_IN;
             return "Logged in as " + authData.username();
@@ -136,6 +188,13 @@ public class Client {
         throw new ResponseException(401, "error: unauthorized");
     }
 
+    /**
+     * Builds a formatted string containing information about all available games.
+     *
+     * @param allGames The collection of GameResponseData objects representing all available games.
+     * @return A formatted string containing information about all available games, including game ID, usernames of white and black players,
+     *         and the name of the game.
+     */
     private static String buildGameList(Collection<GameResponseData> allGames) {
         StringBuilder response = new StringBuilder("All games:\n");
         for (var game : allGames) {
@@ -157,5 +216,16 @@ public class Client {
         }
 
         return String.valueOf(response);
+    }
+
+    /**
+     * Clears the database on the server.
+     *
+     * @return A message indicating successful clearing of the database.
+     * @throws ResponseException if the server responds with an error.
+     */
+    private String clearDataBase() throws ResponseException {
+        server.clear();
+        return "Database cleared.";
     }
 }

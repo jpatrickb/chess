@@ -8,23 +8,53 @@ import java.io.*;
 import java.net.*;
 import java.util.Collection;
 
+/**
+ * Facilitates communication with the server through various methods such as joining a game,
+ * creating a game, registering and logging in users, listing available games, clearing the database, etc.
+ */
 public class ServerFacade {
     private final String serverUrl;
     private String authToken;
+
+    /**
+     * Constructs a ServerFacade object with the specified server URL.
+     *
+     * @param url The URL of the server.
+     */
     public ServerFacade(String url) {
         serverUrl = url;
     }
 
+    /**
+     * Sends a request to join a game.
+     *
+     * @param joinRequest The request to join a game.
+     * @throws ResponseException if the server responds with an error.
+     */
     public void joinGame(JoinRequest joinRequest) throws ResponseException {
         var path = "/game";
         this.makeRequest("PUT", path, joinRequest, null);
     }
 
+    /**
+     * Creates a new game with the provided game name.
+     *
+     * @param gameName The name of the game to be created.
+     * @return GameID object with the ID of the created game.
+     * @throws ResponseException if the server responds with an error.
+     */
     public GameID createGame(GameName gameName) throws ResponseException {
         var path = "/game";
         return this.makeRequest("POST", path, gameName, GameID.class);
     }
 
+    /**
+     * Registers a new user with the provided user data.
+     *
+     * @param userData The data of the user to be registered.
+     * @return Authentication data for the registered user.
+     * @throws ResponseException if the server responds with an error.
+     */
     public AuthData registerUser(UserData userData) throws ResponseException {
         var path = "/user";
         AuthData authData = this.makeRequest("POST", path, userData, AuthData.class);
@@ -34,6 +64,13 @@ public class ServerFacade {
         return authData;
     }
 
+    /**
+     * Logs in a user with the provided user data.
+     *
+     * @param userData The data of the user to be logged in.
+     * @return Authentication data for the logged-in user.
+     * @throws ResponseException if the server responds with an error.
+     */
     public AuthData loginUser(UserData userData) throws ResponseException {
         var path = "/session";
         AuthData authData = this.makeRequest("POST", path, userData, AuthData.class);
@@ -43,15 +80,36 @@ public class ServerFacade {
         return authData;
     }
 
+    /**
+     * Logs out the currently authenticated user.
+     *
+     * @throws ResponseException if the server responds with an error.
+     */
     public void logoutUser() throws ResponseException {
         var path = "/session";
         this.makeRequest("DELETE", path, null, null);
         authToken = null;
     }
 
+    /**
+     * Retrieves a collection of available games from the server.
+     *
+     * @return A collection of game response data.
+     * @throws ResponseException if the server responds with an error.
+     */
     public Collection<GameResponseData> listGames() throws ResponseException {
         var path = "/game";
         return this.makeRequest("GET", path, null, GameList.class).games();
+    }
+
+    /**
+     * Clears the database on the server.
+     *
+     * @throws ResponseException if the server responds with an error.
+     */
+    public void clear() throws ResponseException {
+        var path = "/db";
+        this.makeRequest("DELETE", path, null, null);
     }
 
     private <T> T makeRequest (String method, String path, Object request, Class<T> responseClass) throws ResponseException {
