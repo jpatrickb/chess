@@ -14,7 +14,7 @@ import Service.*;
 import model.GameResponseData;
 import spark.*;
 
-import java.util.Collection;
+import java.util.ArrayList;
 
 /**
  * Initializes a server to run the chess games on
@@ -158,7 +158,7 @@ public class Server {
         var authToken = request.headers("authorization");
         authService.authenticate(authToken);
 
-        Collection<GameResponseData> allGames = listService.getGames();
+        ArrayList<GameResponseData> allGames = listService.getGames();
 
         response.status(200);
         response.body(new Gson().toJson(new ListGamesResponse(allGames)));

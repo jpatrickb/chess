@@ -2,7 +2,7 @@ package dataAccess;
 
 import model.GameData;
 
-import java.util.Collection;
+import java.util.ArrayList;
 
 public interface GameDAO {
     void clear() throws DataAccessException;
@@ -11,7 +11,7 @@ public interface GameDAO {
 
     GameData getGame(int gameID) throws DataAccessException;
 
-    Collection<GameData> listGames() throws DataAccessException;
+    ArrayList<GameData> listGames() throws DataAccessException;
 
     void updateGame(GameData newGame) throws DataAccessException;
 }

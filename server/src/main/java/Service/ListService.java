@@ -5,8 +5,7 @@ import dataAccess.GameDAO;
 import model.GameData;
 import model.GameResponseData;
 
-import java.util.Collection;
-import java.util.HashSet;
+import java.util.ArrayList;
 
 /**
  * Handles requests to list all the games in the database
@@ -27,9 +26,9 @@ public class ListService {
      * Contains only the gameID, player usernames, and gameName (not the ChessGame object)
      * @return Collection of GameResponseData containing data for all the games
      */
-    public Collection<GameResponseData> getGames() throws DataAccessException {
-        Collection<GameData> allGames = gameDAO.listGames();
-        Collection<GameResponseData> gameResponseData = new HashSet<>();
+    public ArrayList<GameResponseData> getGames() throws DataAccessException {
+        ArrayList<GameData> allGames = gameDAO.listGames();
+        ArrayList<GameResponseData> gameResponseData = new ArrayList<>();
         for (var game : allGames) {
             gameResponseData.add(new GameResponseData(
                             game.gameID(), game.whiteUsername(),

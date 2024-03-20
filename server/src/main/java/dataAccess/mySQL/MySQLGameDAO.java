@@ -11,8 +11,7 @@ import model.GameData;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Collection;
-import java.util.HashSet;
+import java.util.ArrayList;
 
 public class MySQLGameDAO implements GameDAO {
     private final Connection conn;
@@ -106,8 +105,8 @@ public class MySQLGameDAO implements GameDAO {
      * @throws DataAccessException if anything fails
      */
     @Override
-    public Collection<GameData> listGames() throws DataAccessException {
-        Collection<GameData> gameList = new HashSet<>();
+    public ArrayList<GameData> listGames() throws DataAccessException {
+        ArrayList<GameData> gameList = new ArrayList<>();
 
         try (var preparedStatement = conn.prepareStatement("SELECT * from GAME")) {
             try (var rs = preparedStatement.executeQuery()) {

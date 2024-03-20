@@ -13,6 +13,19 @@ import java.util.Objects;
 public class ChessPiece {
     private final ChessGame.TeamColor color;
     private final PieceType type;
+    public static final String WHITE_KING = " ♔ ";
+    public static final String WHITE_QUEEN = " ♕ ";
+    public static final String WHITE_BISHOP = " ♗ ";
+    public static final String WHITE_KNIGHT = " ♘ ";
+    public static final String WHITE_ROOK = " ♖ ";
+    public static final String WHITE_PAWN = " ♙ ";
+    public static final String BLACK_KING = " ♚ ";
+    public static final String BLACK_QUEEN = " ♛ ";
+    public static final String BLACK_BISHOP = " ♝ ";
+    public static final String BLACK_KNIGHT = " ♞ ";
+    public static final String BLACK_ROOK = " ♜ ";
+    public static final String BLACK_PAWN = " ♟ ";
+
 
     public ChessPiece(ChessGame.TeamColor pieceColor, PieceType type) {
         this.color = pieceColor;
@@ -297,10 +310,22 @@ public class ChessPiece {
 
     @Override
     public String toString() {
-        return "ChessPiece{" +
-                "color=" + color +
-                ", type=" + type +
-                '}';
+        if (color == ChessGame.TeamColor.WHITE) {
+            return getString(WHITE_KING, WHITE_QUEEN, WHITE_BISHOP, WHITE_KNIGHT, WHITE_ROOK, WHITE_PAWN);
+        } else {
+            return getString(BLACK_KING, BLACK_QUEEN, BLACK_BISHOP, BLACK_KNIGHT, BLACK_ROOK, BLACK_PAWN);
+        }
+    }
+
+    private String getString(String king, String queen, String bishop, String knight, String rook, String pawn) {
+        return switch (type) {
+            case KING -> king;
+            case QUEEN -> queen;
+            case BISHOP -> bishop;
+            case KNIGHT -> knight;
+            case ROOK -> rook;
+            case PAWN -> pawn;
+        };
     }
 
     @Override

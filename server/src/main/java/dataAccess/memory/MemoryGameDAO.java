@@ -3,7 +3,7 @@ package dataAccess.memory;
 import dataAccess.GameDAO;
 import model.GameData;
 
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -44,8 +44,8 @@ public class MemoryGameDAO implements GameDAO {
      * @return Collection of GameData objects - all games in memory
      */
     @Override
-    public Collection<GameData> listGames() {
-        return gameList.values();
+    public ArrayList<GameData> listGames() {
+        return (ArrayList<GameData>) gameList.values();
     }
 
     /**

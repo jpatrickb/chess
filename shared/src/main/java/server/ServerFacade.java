@@ -6,7 +6,7 @@ import model.*;
 
 import java.io.*;
 import java.net.*;
-import java.util.Collection;
+import java.util.ArrayList;
 
 /**
  * Facilitates communication with the server through various methods such as joining a game,
@@ -97,7 +97,7 @@ public class ServerFacade {
      * @return A collection of game response data.
      * @throws ResponseException if the server responds with an error.
      */
-    public Collection<GameResponseData> listGames() throws ResponseException {
+    public ArrayList<GameResponseData> listGames() throws ResponseException {
         var path = "/game";
         return this.makeRequest("GET", path, null, GameList.class).games();
     }

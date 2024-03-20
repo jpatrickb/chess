@@ -6,8 +6,8 @@ import exception.ResponseException;
 import model.*;
 import server.ServerFacade;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Objects;
 
 import static ui.EscapeSequences.*;
@@ -19,6 +19,7 @@ public class Client {
     public static State state = State.LOGGED_OUT;
     private final ServerFacade server;
     private final Repl repl;
+    private ArrayList<GameResponseData> allGames;
 
     /**
      * Constructs a Client object with the specified server URL and REPL interface.
@@ -39,7 +40,7 @@ public class Client {
      */
     public String eval(String input) {
         try {
-            var tokens = input.toLowerCase().split(" ");
+            var tokens = input.split(" ");
             var cmd = (tokens.length > 0) ? tokens[0] : "help";
             var params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
@@ -93,38 +94,69 @@ public class Client {
      *
      * @param params The parameters for joining the game, including the game ID and optionally the desired color (WHITE or BLACK).
      * @return An empty string if the operation is successful.
-     * @throws ResponseException if the server responds with an error.
      */
-    private String joinGame(String[] params) throws ResponseException {
-        if (params.length == 1) {
-            server.joinGame(new JoinRequest(Integer.parseInt(params[0]), null));
-            BoardDisplay.main(new String[]{new ChessBoard().toString()});
-            return "";
-        } else if (params.length == 2) {
-            if (Objects.equals(params[1], "white")) {
-                ChessGame.TeamColor color = ChessGame.TeamColor.WHITE;
-                server.joinGame(new JoinRequest(Integer.parseInt(params[0]), color));
-            } else if (Objects.equals(params[1], "black")) {
-                ChessGame.TeamColor color = ChessGame.TeamColor.BLACK;
-                server.joinGame(new JoinRequest(Integer.parseInt(params[0]), color));
-            } else {
-                return "Invalid color.";
-            }
-            BoardDisplay.main(new String[]{""});
-            return "";
+    private String joinGame(String[] params) {
+        if (state == State.LOGGED_OUT) {
+            return "Must login first";
         }
-        throw new ResponseException(400, "error: bad request");
+        int idx = Integer.parseInt(params[0]);
+        try {
+            updateGames();
+            var game = allGames.get(idx - 1);
+
+            if (params.length == 1) {
+                try {
+                    server.joinGame(new JoinRequest(game.gameID(), null));
+                } catch (ResponseException e) {
+                    return "Failed to observe game, try later.";
+                }
+                BoardDisplay.main(new String[]{new ChessBoard().toString()});
+                return "";
+            } else if (params.length == 2) {
+                if (Objects.equals(params[1].toLowerCase(), "white")) {
+                    if (game.whiteUsername() != null) {
+                        return "Can't join as white";
+                    }
+                    ChessGame.TeamColor color = ChessGame.TeamColor.WHITE;
+                    try {
+                        server.joinGame(new JoinRequest(game.gameID(), color));
+                    } catch (ResponseException e) {
+                        return "Can't join as white";
+                    }
+                } else if (Objects.equals(params[1].toLowerCase(), "black")) {
+                    if (game.blackUsername() != null) {
+                        return "Can't join as black";
+                    }
+                    ChessGame.TeamColor color = ChessGame.TeamColor.BLACK;
+                    try {
+                        server.joinGame(new JoinRequest(game.gameID(), color));
+                    } catch (ResponseException e) {
+                        return "Can't join as black";
+                    }
+                } else {
+                    return "Invalid color.";
+                }
+                BoardDisplay.main(new String[]{""});
+                return "";
+            }
+        } catch (IndexOutOfBoundsException e) {
+            return "Requested game doesn't exist";
+        }
+
+        return "Invalid input";
     }
 
     /**
      * Retrieves a collection of available games from the server.
      *
      * @return A string representation of the list of available games.
-     * @throws ResponseException if the server responds with an error.
      */
-    private String listGames() throws ResponseException {
-        Collection<GameResponseData> allGames = server.listGames();
-        return buildGameList(allGames);
+    private String listGames() {
+        if (state == State.LOGGED_OUT) {
+            return "Must login first";
+        }
+        updateGames();
+        return buildGameList();
     }
 
     /**
@@ -132,25 +164,42 @@ public class Client {
      *
      * @param params The parameters for creating the game, including the name of the game.
      * @return A message indicating the successful creation of the game.
-     * @throws ResponseException if the server responds with an error.
      */
-    private String createGame(String[] params) throws ResponseException {
-        if (params.length == 1) {
-            GameID gameID = server.createGame(new GameName(params[0]));
-            return "Game " + params[0] + " created with ID " + gameID.gameID();
+    private String createGame(String[] params) {
+        if (state == State.LOGGED_OUT) {
+            return "Must login first";
         }
-        throw new ResponseException(400, "error: bad request");
+        String name = String.join(" ", params);
+        GameID gameID;
+        try {
+            gameID = server.createGame(new GameName(name));
+            updateGames();
+            for (int idx = 0; idx < allGames.size(); idx ++) {
+                if (allGames.get(idx).gameID() == gameID.gameID()) {
+                    return "Game " + name + " created with ID " + (idx + 1);
+                }
+            }
+            return "Error creating game, please try again";
+        } catch (ResponseException e) {
+            return "Couldn't create game with that name, try again.";
+        }
     }
 
     /**
      * Logs out the currently authenticated user.
      *
      * @return A message indicating successful logout.
-     * @throws ResponseException if the server responds with an error.
      */
-    private String logout() throws ResponseException {
+    private String logout() {
+        if (state == State.LOGGED_OUT) {
+            return "Must login first";
+        }
         state = State.LOGGED_OUT;
-        server.logoutUser();
+        try {
+            server.logoutUser();
+        } catch (ResponseException e) {
+            return "Failed to log out";
+        }
         return "Logged out user";
     }
 
@@ -159,16 +208,23 @@ public class Client {
      *
      * @param params The parameters for registering a user, including username, password, and email.
      * @return A message indicating successful registration and login.
-     * @throws ResponseException if the server responds with an error.
      */
-    private String register(String[] params) throws ResponseException {
+    private String register(String[] params) {
+        if (state == State.LOGGED_IN) {
+            return "Must logout first";
+        }
         if (params.length == 3) {
             UserData userData = new UserData(params[0], params[1], params[2]);
-            AuthData authData = server.registerUser(userData);
+            AuthData authData;
+            try {
+                authData = server.registerUser(userData);
+            } catch (ResponseException e) {
+                return "Invalid credentials";
+            }
             state = State.LOGGED_IN;
             return "Logged in as " + authData.username();
         }
-        throw new ResponseException(400, "error: bad request");
+        return "Invalid credentials";
     }
 
     /**
@@ -176,46 +232,78 @@ public class Client {
      *
      * @param params The parameters for logging in a user, including username and password.
      * @return A message indicating successful login.
-     * @throws ResponseException if the server responds with an error.
      */
-    private String login(String[] params) throws ResponseException {
+    private String login(String[] params) {
+        if (state == State.LOGGED_IN) {
+            return "Must logout first";
+        }
         if (params.length == 2) {
             UserData userData = new UserData(params[0], params[1], null);
-            AuthData authData = server.loginUser(userData);
+            AuthData authData;
+            try {
+                authData = server.loginUser(userData);
+            } catch (ResponseException e) {
+                return "Invalid login";
+            }
             state = State.LOGGED_IN;
             return "Logged in as " + authData.username();
         }
-        throw new ResponseException(401, "error: unauthorized");
+        return "Invalid credentials";
     }
 
     /**
      * Builds a formatted string containing information about all available games.
      *
-     * @param allGames The collection of GameResponseData objects representing all available games.
      * @return A formatted string containing information about all available games, including game ID, usernames of white and black players,
      *         and the name of the game.
      */
-    private static String buildGameList(Collection<GameResponseData> allGames) {
-        StringBuilder response = new StringBuilder("All games:\n");
-        for (var game : allGames) {
-            response.append("gameID:\t\t");
-            response.append(game.gameID());
-            response.append("\n");
-
-            response.append("whiteUsername:\t");
-            response.append(game.whiteUsername());
-            response.append("\n");
-
-            response.append("blackUsername:\t");
-            response.append(game.blackUsername());
-            response.append("\n");
-
-            response.append("gameName:\t\t");
-            response.append(game.gameName());
-            response.append("\n\n");
+    private String buildGameList() {
+        StringBuilder response = new StringBuilder();
+        response.append(LINE);
+        response.append(String.format("| ID  | %-14s| %-14s| %-12s|\n", "White Player", "Black Player", "Game Name"));
+        response.append(LINE);
+        for (int idx = 0; idx < allGames.size(); idx++) {
+            var game = allGames.get(idx);
+            response.append(String.format("| %-4d| %-14s| %-14s| %-12s|\n", idx+1, game.whiteUsername(), game.blackUsername(), game.gameName()));
+            response.append(LINE);
         }
 
         return String.valueOf(response);
+    }
+
+    private void updateGames() {
+        try {
+            var newGames = server.listGames();
+            ArrayList<GameResponseData> tempGames = new ArrayList<>();
+
+            if (allGames != null) {
+                for (var currGame : allGames) {
+                    for (var newGame : newGames) {
+                        if (Objects.equals(newGame.gameID(), currGame.gameID())) {
+                            tempGames.add(newGame);
+                        }
+                    }
+                }
+                for (var newGame : newGames) {
+                    boolean found = false;
+                    for (var currGame : allGames) {
+                        if (Objects.equals(newGame.gameID(), currGame.gameID())) {
+                            found = true;
+                            break;
+                        }
+                    }
+
+                    if (!found) {
+                        tempGames.add(newGame);
+                    }
+                }
+            } else {
+                tempGames = newGames;
+            }
+            allGames = tempGames;
+        } catch (ResponseException e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     /**

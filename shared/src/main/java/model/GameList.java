@@ -1,6 +1,6 @@
 package model;
 
-import java.util.Collection;
+import java.util.ArrayList;
 
-public record GameList(Collection<GameResponseData> games) {
+public record GameList(ArrayList<GameResponseData> games) {
 }

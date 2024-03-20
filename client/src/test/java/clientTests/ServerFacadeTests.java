@@ -29,6 +29,7 @@ public class ServerFacadeTests {
     @BeforeEach
     public void createUsers() {
         try {
+            facade.clear();
             facade.registerUser(new UserData("patrick", "beal", "email"));
             gameID = facade.createGame(new GameName("myGame"));
         } catch (ResponseException e) {

@@ -32,8 +32,7 @@ public class BoardDisplay {
 
         drawHeadersForward(out);
 
-        setBlack(out);
-        out.println();
+        out.println(SET_BG_COLOR_WHITE);
 
         drawHeadersBackward(out);
 
@@ -63,7 +62,7 @@ public class BoardDisplay {
         out.print(SET_BG_COLOR_LIGHT_GREY);
         out.print(EMPTY.repeat(LINE_WIDTH_IN_CHARS));
 
-        out.println();
+        out.println(SET_BG_COLOR_WHITE);
     }
 
     /**
@@ -85,7 +84,8 @@ public class BoardDisplay {
         out.print(SET_BG_COLOR_LIGHT_GREY);
         out.print(EMPTY.repeat(LINE_WIDTH_IN_CHARS));
 
-        out.println();
+        out.println(SET_BG_COLOR_WHITE);
+
     }
 
     /**
@@ -141,7 +141,8 @@ public class BoardDisplay {
             out.print(" ");
             out.print(BOARD_SIZE_IN_SQUARES - row);
             out.print(" ");
-            out.println();
+
+            out.println(SET_BG_COLOR_WHITE);
         }
     }
 
@@ -184,6 +185,8 @@ public class BoardDisplay {
             out.print(" ");
             out.print(row + 1);
             out.print(" ");
+
+            out.print(SET_BG_COLOR_WHITE);
             out.println();
         }
     }
