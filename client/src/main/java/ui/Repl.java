@@ -1,6 +1,9 @@
 package ui;
 
 
+import webSocketMessages.serverMessages.ServerMessage;
+import websocket.NotificationHandler;
+
 import java.util.Scanner;
 
 import static ui.EscapeSequences.*;
@@ -8,7 +11,7 @@ import static ui.EscapeSequences.*;
 /**
  * The Repl class represents a Read-Eval-Print Loop (REPL) interface for interacting with the chess game.
  */
-public class Repl {
+public class Repl implements NotificationHandler {
     private final Client client;
 
     /**
@@ -39,8 +42,7 @@ public class Repl {
                 result = client.eval(line);
                 System.out.print(SET_TEXT_COLOR_BLUE + result);
             } catch (Throwable e) {
-                var msg = e.toString();
-                System.out.print(msg);
+                System.out.print(e.getMessage());
             }
         }
 
@@ -52,5 +54,10 @@ public class Repl {
      */
     private void printPrompt() {
         System.out.print(SET_TEXT_COLOR_BLACK + "\n" + "[" + Client.state + "] >>> " + SET_TEXT_COLOR_GREEN);
+    }
+
+    @Override
+    public void notify(ServerMessage message) {
+        System.out.println(SET_TEXT_COLOR_RED);
     }
 }
