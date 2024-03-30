@@ -5,6 +5,8 @@ import chess.ChessGame;
 import exception.ResponseException;
 import model.*;
 import server.ServerFacade;
+import websocket.NotificationHandler;
+import websocket.WebSocketFacade;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,8 +20,10 @@ import static ui.EscapeSequences.*;
 public class Client {
     public static State state = State.LOGGED_OUT;
     private final ServerFacade server;
-    private final Repl repl;
+    private final String serverUrl;
+    private final NotificationHandler repl;
     private ArrayList<GameResponseData> allGames;
+    private WebSocketFacade ws;
 
     /**
      * Constructs a Client object with the specified server URL and REPL interface.
@@ -27,8 +31,9 @@ public class Client {
      * @param serverUrl The URL of the server.
      * @param repl      The REPL interface.
      */
-    public Client(String serverUrl, Repl repl) {
+    public Client(String serverUrl, NotificationHandler repl) {
         server = new ServerFacade(serverUrl);
+        this.serverUrl = serverUrl;
         this.repl = repl;
     }
 
@@ -106,6 +111,7 @@ public class Client {
 
             if (params.length == 1) {
                 try {
+                    ws = new WebSocketFacade(serverUrl, repl);
                     server.joinGame(new JoinRequest(game.gameID(), null));
                 } catch (ResponseException e) {
                     return "Failed to observe game, try later.";

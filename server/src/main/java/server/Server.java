@@ -13,6 +13,7 @@ import model.GameID;
 import Service.*;
 import model.GameResponseData;
 import spark.*;
+import websocket.WebSocketHandler;
 
 import java.util.ArrayList;
 
@@ -29,6 +30,7 @@ public class Server {
     private GameService gameService;
     private ClearService clearService;
     private AuthenticationService authService;
+    private WebSocketHandler webSocketHandler;
 
 
 
@@ -46,6 +48,8 @@ public class Server {
             gameService = new GameService(gameDAO);
             clearService = new ClearService(userDAO, authDAO, gameDAO);
             authService = new AuthenticationService(authDAO);
+
+            webSocketHandler = new WebSocketHandler();
         } catch (ResponseException ex) {
             System.out.printf("Unable to connect to database: %s%n", ex.getMessage());
         }
@@ -54,10 +58,12 @@ public class Server {
     public int run(int desiredPort) {
         Spark.port(desiredPort);
         Spark.staticFiles.location("web");
-        Spark.init();
+//        Spark.init();
 
 
         // Register your endpoints and handle exceptions here.
+        Spark.webSocket("/connect", webSocketHandler);
+
         Spark.post("/user", this::registrationHandler);
 
         Spark.post("/session", this::loginUser);
@@ -153,6 +159,7 @@ public class Server {
      * @param response HTTP response
      * @return JSON containing a collection of the games
      * @throws ResponseException If user is unauthorized
+     * @throws DataAccessException If error occurs while communicating with database
      */
     private Object getGames(Request request, Response response) throws ResponseException, DataAccessException {
         var authToken = request.headers("authorization");
