@@ -93,6 +93,8 @@ public class MySQLGameDAO implements GameDAO {
                 } else {
                     return null;
                 }
+            } catch (SQLException e) {
+                throw new DataAccessException(e.getMessage());
             }
         } catch (SQLException e) {
             throw new DataAccessException(e.getMessage());

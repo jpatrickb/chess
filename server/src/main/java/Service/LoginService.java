@@ -47,4 +47,8 @@ public class LoginService {
             throw new ResponseException(401, "error: unauthorized");
         }
     }
+
+    public String getUser(String authToken) throws DataAccessException {
+        return authDAO.getAuth(authToken).username();
+    }
 }

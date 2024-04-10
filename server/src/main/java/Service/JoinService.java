@@ -64,5 +64,4 @@ public class JoinService {
 
         gameDAO.updateGame(newGame);
     }
-
 }

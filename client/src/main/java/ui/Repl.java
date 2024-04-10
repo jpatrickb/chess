@@ -1,6 +1,9 @@
 package ui;
 
 
+import webSocketMessages.serverMessages.ErrorMessage;
+import webSocketMessages.serverMessages.LoadGameMessage;
+import webSocketMessages.serverMessages.NotificationMessage;
 import webSocketMessages.serverMessages.ServerMessage;
 import websocket.NotificationHandler;
 
@@ -57,7 +60,22 @@ public class Repl implements NotificationHandler {
     }
 
     @Override
-    public void notify(ServerMessage message) {
-        System.out.println(SET_TEXT_COLOR_RED);
+    public void notify(NotificationMessage message) {
+        System.out.print(SET_TEXT_COLOR_BLUE + message.getMessage());
+        printPrompt();
+    }
+
+    @Override
+    public void loadGame(LoadGameMessage message) {
+        var game = message.getGame();
+        var color = message.getColor();
+        BoardDisplay.main(game, color);
+        printPrompt();
+    }
+
+    @Override
+    public void error(ErrorMessage message) {
+        System.out.print(SET_TEXT_COLOR_RED + message.getErrorMessage());
+        printPrompt();
     }
 }

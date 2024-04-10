@@ -1,5 +1,10 @@
 package ui;
 
+import chess.ChessBoard;
+import chess.ChessGame;
+import chess.ChessPiece;
+import chess.ChessPosition;
+
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import static ui.EscapeSequences.*;
@@ -19,28 +24,31 @@ public class BoardDisplay {
     /**
      * Displays the chess board with pieces on the console.
      *
-     * @param args Command line arguments (not used).
+     * @param game ChessGame object to print game from
+     * @param color The color whose perspective to print the game from
      */
-    public static void main(String[] args) {
+    public static void main(ChessGame game, ChessGame.TeamColor color) {
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
+        var board = game.getBoard();
 
-        out.print(ERASE_SCREEN);
+        out.println(ERASE_SCREEN);
 
-        drawHeadersForward(out);
+        if (color == ChessGame.TeamColor.WHITE) {
+            drawHeadersForward(out);
 
-        drawChessBoardForward(out);
+            drawChessBoardForward(out, board);
 
-        drawHeadersForward(out);
+            drawHeadersForward(out);
+        } else {
+            drawHeadersBackward(out);
 
-        out.println(SET_BG_COLOR_WHITE);
+            drawChessBoardBackward(out, board);
 
-        drawHeadersBackward(out);
-
-        drawChessBoardBackward(out);
-
-        drawHeadersBackward(out);
+            drawHeadersBackward(out);
+        }
 
         out.print(SET_BG_COLOR_WHITE);
+
         out.print(SET_TEXT_COLOR_WHITE);
     }
 
@@ -105,36 +113,48 @@ public class BoardDisplay {
     /**
      * Draws the chess board with pieces in forward order.
      *
-     * @param out The output stream to print to.
+     * @param out   The output stream to print to.
+     * @param board The board to print
      */
-    private static void drawChessBoardForward(PrintStream out) {
+    private static void drawChessBoardForward(PrintStream out, ChessBoard board) {
         for (int row = 0; row < 8; row++) {
             out.print(SET_BG_COLOR_LIGHT_GREY);
             out.print(" ");
             out.print(BOARD_SIZE_IN_SQUARES - row);
             out.print(" ");
-            if (row < 2) {
-                out.print(SET_TEXT_COLOR_RED);
-            } else {
-                out.print(SET_TEXT_COLOR_BLUE);
-            }
+//            if (row < 2) {
+//                out.print(SET_TEXT_COLOR_RED);
+//            } else {
+//                out.print(SET_TEXT_COLOR_BLUE);
+//            }
             for (int col = 0; col < 8; col++) {
                 if ((col + row) % 2 == 0) {
                     out.print(SET_BG_COLOR_WHITE);
                 } else {
                     out.print(SET_BG_COLOR_BLACK);
                 }
-                if (row == 0) {
-                    out.print(BLACK_PIECES[col]);
-                } else if (row == 1) {
-                    out.print(BLACK_PAWN);
-                } else if (row == 6) {
-                    out.print(WHITE_PAWN);
-                } else if (row == 7) {
-                    out.print(WHITE_PIECES[col]);
-                } else {
+
+                ChessPiece piece = board.getPiece(new ChessPosition(8 - row, col + 1));
+                if (piece == null) {
                     out.print(EMPTY.repeat(LINE_WIDTH_IN_CHARS));
+                } else if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
+                    out.print(SET_TEXT_COLOR_BLUE);
+                    out.print(piece);
+                } else if (piece.getTeamColor() == ChessGame.TeamColor.BLACK) {
+                    out.print(SET_TEXT_COLOR_RED);
+                    out.print(piece);
                 }
+//                if (row == 0) {
+//                    out.print(BLACK_PIECES[col]);
+//                } else if (row == 1) {
+//                    out.print(BLACK_PAWN);
+//                } else if (row == 6) {
+//                    out.print(WHITE_PAWN);
+//                } else if (row == 7) {
+//                    out.print(WHITE_PIECES[col]);
+//                } else {
+//                    out.print(EMPTY.repeat(LINE_WIDTH_IN_CHARS));
+//                }
             }
             out.print(SET_TEXT_COLOR_BLACK);
             out.print(SET_BG_COLOR_LIGHT_GREY);
@@ -149,36 +169,48 @@ public class BoardDisplay {
     /**
      * Draws the chess board with pieces in backward order.
      *
-     * @param out The output stream to print to.
+     * @param out   The output stream to print to.
+     * @param board The board to print
      */
-    private static void drawChessBoardBackward(PrintStream out) {
+    private static void drawChessBoardBackward(PrintStream out, ChessBoard board) {
         for (int row = 0; row < 8; row++) {
             out.print(SET_BG_COLOR_LIGHT_GREY);
             out.print(" ");
             out.print(row + 1);
             out.print(" ");
-            if (row < 2) {
-                out.print(SET_TEXT_COLOR_BLUE);
-            } else {
-                out.print(SET_TEXT_COLOR_RED);
-            }
+//            if (row < 2) {
+//                out.print(SET_TEXT_COLOR_BLUE);
+//            } else {
+//                out.print(SET_TEXT_COLOR_RED);
+//            }
             for (int col = 0; col < 8; col++) {
                 if ((col + row) % 2 == 0) {
                     out.print(SET_BG_COLOR_WHITE);
                 } else {
                     out.print(SET_BG_COLOR_BLACK);
                 }
-                if (row == 0) {
-                    out.print(WHITE_PIECES[BOARD_SIZE_IN_SQUARES - col - 1]);
-                } else if (row == 1) {
-                    out.print(WHITE_PAWN);
-                } else if (row == 6) {
-                    out.print(BLACK_PAWN);
-                } else if (row == 7) {
-                    out.print(BLACK_PIECES[BOARD_SIZE_IN_SQUARES - col - 1]);
-                } else {
+
+                ChessPiece piece = board.getPiece(new ChessPosition(row + 1, 8 - col));
+                if (piece == null) {
                     out.print(EMPTY.repeat(LINE_WIDTH_IN_CHARS));
+                } else if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
+                    out.print(SET_TEXT_COLOR_BLUE);
+                    out.print(piece);
+                } else if (piece.getTeamColor() == ChessGame.TeamColor.BLACK) {
+                    out.print(SET_TEXT_COLOR_RED);
+                    out.print(piece);
                 }
+//                if (row == 0) {
+//                    out.print(WHITE_PIECES[BOARD_SIZE_IN_SQUARES - col - 1]);
+//                } else if (row == 1) {
+//                    out.print(WHITE_PAWN);
+//                } else if (row == 6) {
+//                    out.print(BLACK_PAWN);
+//                } else if (row == 7) {
+//                    out.print(BLACK_PIECES[BOARD_SIZE_IN_SQUARES - col - 1]);
+//                } else {
+//                    out.print(EMPTY.repeat(LINE_WIDTH_IN_CHARS));
+//                }
             }
             out.print(SET_TEXT_COLOR_BLACK);
             out.print(SET_BG_COLOR_LIGHT_GREY);

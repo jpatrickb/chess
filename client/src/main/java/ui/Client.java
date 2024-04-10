@@ -1,6 +1,5 @@
 package ui;
 
-import chess.ChessBoard;
 import chess.ChessGame;
 import exception.ResponseException;
 import model.*;
@@ -23,7 +22,8 @@ public class Client {
     private final String serverUrl;
     private final NotificationHandler repl;
     private ArrayList<GameResponseData> allGames;
-    private WebSocketFacade ws;
+    private final WebSocketFacade ws;
+    private AuthData authData;
 
     /**
      * Constructs a Client object with the specified server URL and REPL interface.
@@ -35,6 +35,7 @@ public class Client {
         server = new ServerFacade(serverUrl);
         this.serverUrl = serverUrl;
         this.repl = repl;
+        this.ws = new WebSocketFacade(this.serverUrl, this.repl);
     }
 
     /**
@@ -104,53 +105,41 @@ public class Client {
         if (state == State.LOGGED_OUT) {
             return "Must login first";
         }
-        int idx = Integer.parseInt(params[0]);
+
         try {
             updateGames();
+            int idx = Integer.parseInt(params[0]);
             var game = allGames.get(idx - 1);
 
-            if (params.length == 1) {
-                try {
-                    ws = new WebSocketFacade(serverUrl, repl);
-                    server.joinGame(new JoinRequest(game.gameID(), null));
-                } catch (ResponseException e) {
-                    return "Failed to observe game, try later.";
-                }
-                BoardDisplay.main(new String[]{new ChessBoard().toString()});
-                return "";
-            } else if (params.length == 2) {
-                if (Objects.equals(params[1].toLowerCase(), "white")) {
-                    if (game.whiteUsername() != null) {
-                        return "Can't join as white";
-                    }
-                    ChessGame.TeamColor color = ChessGame.TeamColor.WHITE;
-                    try {
-                        server.joinGame(new JoinRequest(game.gameID(), color));
-                    } catch (ResponseException e) {
-                        return "Can't join as white";
-                    }
-                } else if (Objects.equals(params[1].toLowerCase(), "black")) {
-                    if (game.blackUsername() != null) {
-                        return "Can't join as black";
-                    }
-                    ChessGame.TeamColor color = ChessGame.TeamColor.BLACK;
-                    try {
-                        server.joinGame(new JoinRequest(game.gameID(), color));
-                    } catch (ResponseException e) {
-                        return "Can't join as black";
-                    }
-                } else {
-                    return "Invalid color.";
-                }
-                BoardDisplay.main(new String[]{""});
-                return "";
+            ChessGame.TeamColor color = parseColor(params.length == 2 ? params[1].toLowerCase() : null);
+            if (color == null) {
+                return "Invalid color.";
             }
+
+            if (game.isOccupied(color)) {
+                return String.format("Can't join as %s", color.name().toLowerCase());
+            }
+
+            server.joinGame(new JoinRequest(game.gameID(), color));
+            ws.joinPlayer(authData.authToken(), game.gameID(), color);
+//            BoardDisplay.main(new ChessGame(), color);
+            return "";
         } catch (IndexOutOfBoundsException e) {
             return "Requested game doesn't exist";
+        } catch (ResponseException e) {
+            return "Failed to observe game, try later.";
+        } catch (NumberFormatException e) {
+            return "Invalid input";
         }
-
-        return "Invalid input";
     }
+
+    private ChessGame.TeamColor parseColor(String color) {
+        if (color != null && (color.equals("white") || color.equals("black"))) {
+            return ChessGame.TeamColor.valueOf(color.toUpperCase());
+        }
+        return null;
+    }
+
 
     /**
      * Retrieves a collection of available games from the server.
@@ -221,7 +210,6 @@ public class Client {
         }
         if (params.length == 3) {
             UserData userData = new UserData(params[0], params[1], params[2]);
-            AuthData authData;
             try {
                 authData = server.registerUser(userData);
             } catch (ResponseException e) {
@@ -245,7 +233,6 @@ public class Client {
         }
         if (params.length == 2) {
             UserData userData = new UserData(params[0], params[1], null);
-            AuthData authData;
             try {
                 authData = server.loginUser(userData);
             } catch (ResponseException e) {

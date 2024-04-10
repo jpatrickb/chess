@@ -1,5 +1,6 @@
 package server;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import dataAccess.*;
 import dataAccess.mySQL.MySQLAuthDAO;
@@ -13,8 +14,10 @@ import model.GameID;
 import Service.*;
 import model.GameResponseData;
 import spark.*;
+import webSocketMessages.userCommands.JoinPlayerCommand;
 import websocket.WebSocketHandler;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -49,7 +52,7 @@ public class Server {
             clearService = new ClearService(userDAO, authDAO, gameDAO);
             authService = new AuthenticationService(authDAO);
 
-            webSocketHandler = new WebSocketHandler();
+            webSocketHandler = new WebSocketHandler(gameService, loginService);
         } catch (ResponseException ex) {
             System.out.printf("Unable to connect to database: %s%n", ex.getMessage());
         }
@@ -77,9 +80,15 @@ public class Server {
 
         Spark.exception(ResponseException.class, this::responseExceptionHandler);
         Spark.exception(DataAccessException.class, this::dataExceptionHandler);
+        Spark.exception(IOException.class, this::ioExceptionHandler);
 
         Spark.awaitInitialization();
         return Spark.port();
+    }
+
+    private void ioExceptionHandler(IOException e, Request request, Response response) {
+        response.status(500);
+        response.body(new Gson().toJson(new ErrorMessage(e.getMessage())));
     }
 
     private void responseExceptionHandler(ResponseException e, Request request, Response response) {
@@ -179,7 +188,7 @@ public class Server {
      * @return Nothing
      * @throws ResponseException If the user is unauthorized
      */
-    private Object joinGame(Request request, Response response) throws ResponseException, DataAccessException {
+    private Object joinGame(Request request, Response response) throws ResponseException, DataAccessException, IOException {
         var authToken = request.headers("authorization");
         authService.authenticate(authToken);
 
@@ -188,6 +197,7 @@ public class Server {
         var joinInfo = new Gson().fromJson(request.body(), JoinGameRequest.class);
 
         joinService.joinGame(joinInfo, authData);
+
         response.status(200);
         return "{}";
     }

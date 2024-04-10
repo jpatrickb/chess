@@ -49,4 +49,9 @@ public class GameService {
 
         return new GameID(gameID);
     }
+
+
+    public GameData getGame(Integer gameID) throws DataAccessException {
+        return gameDAO.getGame(gameID);
+    }
 }

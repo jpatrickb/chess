@@ -2,6 +2,7 @@ package websocket;
 
 
 import org.eclipse.jetty.websocket.api.Session;
+import server.Server;
 import webSocketMessages.serverMessages.ServerMessage;
 
 import java.io.IOException;
@@ -20,12 +21,20 @@ public class ConnectionManager {
         connections.remove(userName);
     }
 
-    public void broadcast(String excludePlayer, ServerMessage message) throws IOException {
+    public void sendMessage(String player, String message) throws IOException {
+        var conn = connections.get(player);
+        if (conn.session.isOpen()) {
+            System.out.println("Found connection!");
+            conn.send(message);
+        }
+    }
+
+    public void broadcast(String excludePlayer, String message) throws IOException {
         var removeList = new ArrayList<Connection>();
         for (var c : connections.values()) {
             if (c.session.isOpen()) {
                 if (!c.userName.equals(excludePlayer)) {
-                    c.send(message.toString());
+                    c.send(message);
                 }
             } else {
                 removeList.add(c);

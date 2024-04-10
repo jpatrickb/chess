@@ -1,23 +1,24 @@
 package websocket;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import exception.ResponseException;
 import webSocketMessages.serverMessages.*;
 import webSocketMessages.userCommands.*;
 
-import javax.management.NotificationFilter;
 import javax.websocket.*;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-
 
 public class WebSocketFacade extends Endpoint {
 
     Session session;
     NotificationHandler notificationHandler;
 
-    public WebSocketFacade(String url, NotificationHandler notificationHandler) throws ResponseException {
+    public WebSocketFacade(String url, NotificationHandler notificationHandler) {
         try {
             url = url.replace("http", "ws");
             URI socketURI = new URI(url + "/connect");
@@ -29,8 +30,17 @@ public class WebSocketFacade extends Endpoint {
             this.session.addMessageHandler(new MessageHandler.Whole<String>() {
                 @Override
                 public void onMessage(String s) {
-                    ServerMessage serverMessage = new Gson().fromJson(s, ServerMessage.class);
-                    notificationHandler.notify(serverMessage);
+                    JsonObject obj = JsonParser.parseString(s).getAsJsonObject();
+                    ServerMessage.ServerMessageType type = ServerMessage.ServerMessageType.valueOf(obj.get("serverMessageType").getAsString());
+                    switch (type) {
+                        case LOAD_GAME -> {
+                            notificationHandler.loadGame(new Gson().fromJson(s, LoadGameMessage.class));
+                        }
+                        case ERROR -> {
+                        }
+                        case NOTIFICATION -> {
+                        }
+                    }
                 }
             });
         } catch (URISyntaxException | DeploymentException | IOException e) {
@@ -42,7 +52,16 @@ public class WebSocketFacade extends Endpoint {
     public void onOpen(Session session, EndpointConfig endpointConfig) {
     }
 
-    public void joinPlayer(Session session, EndpointConfig endpointConfig) {
+    public void joinPlayer(String authToken, int gameID, ChessGame.TeamColor color) throws ResponseException {
+        try {
+            var command = new JoinPlayerCommand(authToken, gameID, color);
+            send(new Gson().toJson(command));
+        } catch (IOException e) {
+            throw new ResponseException(500, e.getMessage());
+        }
+    }
 
+    public void send(String msg) throws IOException {
+        this.session.getBasicRemote().sendText(msg);
     }
 }
