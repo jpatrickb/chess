@@ -64,7 +64,8 @@ public class Client {
                 case "logout" -> logout();
                 case "create" -> createGame(params);
                 case "list" -> listGames();
-                case "join", "observe" -> joinGame(params);
+                case "join" -> joinGame(params);
+                case "observe" -> observeGame(params);
                 case "cleardb" -> clearDataBase();
                 case "quit" -> "quit";
                 case "move" -> makeMove(params);
@@ -210,6 +211,30 @@ public class Client {
             ws.joinPlayer(authData.authToken(), game.gameID(), color);
             state = State.IN_GAME;
             teamColor = color;
+            return "";
+        } catch (IndexOutOfBoundsException e) {
+            return "Requested game doesn't exist";
+        } catch (ResponseException e) {
+            return "Failed to observe game, try later.";
+        } catch (NumberFormatException e) {
+            return "Invalid input";
+        }
+    }
+
+    private String observeGame(String[] params) {
+        if (state == State.LOGGED_OUT) {
+            return "Must login first";
+        }
+
+        try {
+            updateGames();
+            int idx = Integer.parseInt(params[0]);
+            int gameID = allGames.get(idx - 1).gameID();
+            game = gameObjects.get(gameID);
+
+            server.joinGame(new JoinRequest(game.gameID(), null));
+            ws.joinPlayer(authData.authToken(), game.gameID(), null);
+            state = State.IN_GAME;
             return "";
         } catch (IndexOutOfBoundsException e) {
             return "Requested game doesn't exist";

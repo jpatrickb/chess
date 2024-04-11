@@ -51,8 +51,13 @@ public class WebSocketFacade extends Endpoint {
 
     public void joinPlayer(String authToken, int gameID, ChessGame.TeamColor color) throws ResponseException {
         try {
-            var command = new JoinPlayerCommand(authToken, gameID, color);
-            send(new Gson().toJson(command));
+            if (color == null) {
+                var command = new JoinObserverCommand(authToken, gameID);
+                send(new Gson().toJson(command));
+            } else {
+                var command = new JoinPlayerCommand(authToken, gameID, color);
+                send(new Gson().toJson(command));
+            }
         } catch (IOException e) {
             throw new ResponseException(500, e.getMessage());
         }
