@@ -5,6 +5,7 @@ import chess.*;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
+import java.util.Objects;
 
 import static ui.EscapeSequences.*;
 
@@ -55,20 +56,19 @@ public class BoardDisplay {
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
         var board = game.getBoard();
 
-        var validMoves = game.validMoves(start);
 
         out.println(ERASE_SCREEN);
 
         if (color == ChessGame.TeamColor.WHITE) {
             drawHeadersForward(out);
 
-            highlightChessBoardForward(out, board, validMoves);
+            highlightChessBoardForward(out, game, start);
 
             drawHeadersForward(out);
         } else {
             drawHeadersBackward(out);
 
-            highlightChessBoardBackward(out, board, validMoves);
+            highlightChessBoardBackward(out, game, start);
 
             drawHeadersBackward(out);
         }
@@ -78,12 +78,10 @@ public class BoardDisplay {
         out.print(SET_TEXT_COLOR_WHITE);
     }
 
-    private static void highlightChessBoardBackward(PrintStream out, ChessBoard board, Collection<ChessMove> validMoves) {
-        ChessPosition start = null;
-        for (var move : validMoves) {
-            start = move.getStartPosition();
-            break;
-        }
+    private static void highlightChessBoardBackward(PrintStream out, ChessGame game, ChessPosition start) {
+        var validMoves = game.validMoves(start);
+        var board = game.getBoard();
+
         for (int row = 0; row < 8; row++) {
             out.print(SET_BG_COLOR_LIGHT_GREY);
             out.print(" ");
@@ -95,6 +93,9 @@ public class BoardDisplay {
                 ChessMove move = new ChessMove(start, endPos, null);
 
                 printBackground(out, validMoves, col, row, move);
+                if (Objects.equals(start, endPos)) {
+                    out.print(SET_BG_COLOR_YELLOW);
+                }
 
                 printNull(out, piece);
             }
@@ -125,12 +126,10 @@ public class BoardDisplay {
         }
     }
 
-    private static void highlightChessBoardForward(PrintStream out, ChessBoard board, Collection<ChessMove> validMoves) {
-        ChessPosition start = null;
-        for (var move : validMoves) {
-            start = move.getStartPosition();
-            break;
-        }
+    private static void highlightChessBoardForward(PrintStream out, ChessGame game, ChessPosition start) {
+        var validMoves = game.validMoves(start);
+        var board = game.getBoard();
+
         for (int row = 0; row < 8; row++) {
             out.print(SET_BG_COLOR_LIGHT_GREY);
             out.print(" ");
@@ -142,6 +141,9 @@ public class BoardDisplay {
                 ChessMove move = new ChessMove(start, newPos, null);
 
                 printBackground(out, validMoves, col, row, move);
+                if (Objects.equals(newPos, start)) {
+                    out.print(SET_BG_COLOR_YELLOW);
+                }
 
                 printNull(out, piece);
             }
