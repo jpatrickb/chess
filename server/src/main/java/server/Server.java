@@ -1,6 +1,5 @@
 package server;
 
-import chess.ChessGame;
 import com.google.gson.Gson;
 import dataAccess.*;
 import dataAccess.mySQL.MySQLAuthDAO;
@@ -9,16 +8,14 @@ import dataAccess.mySQL.MySQLUserDAO;
 import exception.ErrorMessage;
 import exception.ResponseException;
 import handlers.*;
-import model.AuthData;
-import model.GameID;
+import model.*;
 import Service.*;
-import model.GameResponseData;
 import spark.*;
-import webSocketMessages.userCommands.JoinPlayerCommand;
 import websocket.WebSocketHandler;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Initializes a server to run the chess games on
@@ -75,6 +72,8 @@ public class Server {
         Spark.get("/game", this::getGames);
         Spark.post("/game", this::createGame);
         Spark.put("/game", this::joinGame);
+
+        Spark.get("/objects", this::gameObjects);
 
         Spark.delete("/db", this::clearApp);
 
@@ -179,6 +178,17 @@ public class Server {
         response.status(200);
         response.body(new Gson().toJson(new ListGamesResponse(allGames)));
         return new Gson().toJson(new ListGamesResponse(allGames));
+    }
+
+    private Object gameObjects(Request request, Response response) throws ResponseException, DataAccessException {
+        var authToken = request.headers("authorization");
+        authService.authenticate(authToken);
+
+        ConcurrentHashMap<Integer, GameData> games = listService.getGameObjects();
+
+        response.status(200);
+        response.body(new Gson().toJson(new GameObjects(games)));
+        return new Gson().toJson(new GameObjects(games));
     }
 
     /**

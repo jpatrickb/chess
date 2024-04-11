@@ -16,7 +16,6 @@ import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import webSocketMessages.serverMessages.ErrorMessage;
 import webSocketMessages.serverMessages.LoadGameMessage;
 import webSocketMessages.serverMessages.NotificationMessage;
-import webSocketMessages.serverMessages.ServerMessage;
 import webSocketMessages.userCommands.*;
 
 import java.io.IOException;
@@ -46,12 +45,21 @@ public class WebSocketHandler {
                 case MAKE_MOVE -> makeMove(new Gson().fromJson(message, MakeMoveCommand.class));
                 case LEAVE -> leaveGame(new Gson().fromJson(message, LeaveCommand.class));
                 case RESIGN -> resignGame(new Gson().fromJson(message, ResignCommand.class));
+                case GET_GAME -> getGame(new Gson().fromJson(message, GetGameCommand.class));
             }
         } catch (Exception e) {
             System.out.printf("Error occurred: %s%n", e.getMessage());
             var errorMessage = new ErrorMessage(e.getMessage());
             session.getRemote().sendString(new Gson().toJson(errorMessage));
         }
+    }
+
+    private void getGame(GetGameCommand getGameCommand) throws DataAccessException, IOException {
+        var gameData = this.gameService.getGame(getGameCommand.getGameID());
+        String username = loginService.getUser(getGameCommand.getAuthString());
+
+        var loadGame = new LoadGameMessage(gameData);
+        connections.sendMessage(username, new Gson().toJson(loadGame));
     }
 
     private void resignGame(ResignCommand command) throws DataAccessException, IOException, ResponseException {
@@ -68,14 +76,14 @@ public class WebSocketHandler {
         gameData.game().setTeamTurn(ChessGame.TeamColor.NONE);
         gameService.updateGame(gameData);
 
-        var message = new NotificationMessage(String.format("Player %s%n has resigned the game.", username));
+        var message = new NotificationMessage(String.format("Player %s has resigned the game.", username));
         connections.broadcast(null, new Gson().toJson(message));
     }
 
     private void leaveGame(LeaveCommand leaveCommand) throws DataAccessException, IOException {
         String username = loginService.getUser(leaveCommand.getAuthString());
         connections.remove(username);
-        var notification = new NotificationMessage(String.format("Player %s%n has left the game.", username));
+        var notification = new NotificationMessage(String.format("Player %s has left the game.", username));
         connections.broadcast(username, new Gson().toJson(notification));
     }
 
@@ -109,7 +117,7 @@ public class WebSocketHandler {
             throw new ResponseException(400, "Invalid game id");
         }
 
-        var text = String.format("Player %s%n has joined as observer", username);
+        var text = String.format("Player %s has joined as observer", username);
         var notification = new NotificationMessage(text);
         connections.broadcast(username, new Gson().toJson(notification));
         sendGame(gameData, ChessGame.TeamColor.WHITE, username);
@@ -123,7 +131,7 @@ public class WebSocketHandler {
             var message = new ErrorMessage("Can't join as " + command.getPlayerColor().toString());
             connections.sendMessage(username, new Gson().toJson(message));
         } else {
-            var text = String.format("Player %s%n has joined as %s%n", username, command.getPlayerColor());
+            var text = String.format("Player %s has joined as %s%n", username, command.getPlayerColor());
             var notification = new NotificationMessage(text);
             connections.broadcast(username, new Gson().toJson(notification));
             sendGame(gameData, command.getPlayerColor(), username);

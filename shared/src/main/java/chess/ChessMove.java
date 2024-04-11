@@ -47,7 +47,7 @@ public class ChessMove {
     }
 
     private String parsePosition(ChessPosition pos) {
-        return COLS[pos.getColumn() - 1] + (9 - pos.getRow());
+        return COLS[pos.getColumn() - 1] + pos.getRow();
     }
 
     @Override

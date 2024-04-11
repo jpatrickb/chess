@@ -6,6 +6,7 @@ import model.GameData;
 import model.GameResponseData;
 
 import java.util.ArrayList;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Handles requests to list all the games in the database
@@ -37,5 +38,15 @@ public class ListService {
         }
 
         return gameResponseData;
+    }
+
+    public ConcurrentHashMap<Integer, GameData> getGameObjects() throws DataAccessException {
+        ArrayList<GameData> allGames = gameDAO.listGames();
+        ConcurrentHashMap<Integer, GameData> gameData = new ConcurrentHashMap<>();
+        for (var game : allGames) {
+            gameData.put(game.gameID(), game);
+        }
+
+        return gameData;
     }
 }

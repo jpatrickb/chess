@@ -7,6 +7,7 @@ import model.*;
 import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Facilitates communication with the server through various methods such as joining a game,
@@ -100,6 +101,11 @@ public class ServerFacade {
     public ArrayList<GameResponseData> listGames() throws ResponseException {
         var path = "/game";
         return this.makeRequest("GET", path, null, GameList.class).games();
+    }
+
+    public ConcurrentHashMap<Integer, GameData> getGameObjects() throws ResponseException {
+        var path = "/objects";
+        return this.makeRequest("GET", path, null, GameObjects.class).gameObjects();
     }
 
     /**

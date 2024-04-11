@@ -1,12 +1,11 @@
 package ui;
 
-import chess.ChessBoard;
-import chess.ChessGame;
-import chess.ChessPiece;
-import chess.ChessPosition;
+import chess.*;
 
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
+
 import static ui.EscapeSequences.*;
 
 /**
@@ -50,6 +49,123 @@ public class BoardDisplay {
         out.print(SET_BG_COLOR_WHITE);
 
         out.print(SET_TEXT_COLOR_WHITE);
+    }
+
+    public static void highlight(ChessGame game, ChessGame.TeamColor color, ChessPosition start) {
+        var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
+        var board = game.getBoard();
+
+        var validMoves = game.validMoves(start);
+
+        out.println(ERASE_SCREEN);
+
+        if (color == ChessGame.TeamColor.WHITE) {
+            drawHeadersForward(out);
+
+            highlightChessBoardForward(out, board, validMoves);
+
+            drawHeadersForward(out);
+        } else {
+            drawHeadersBackward(out);
+
+            highlightChessBoardBackward(out, board, validMoves);
+
+            drawHeadersBackward(out);
+        }
+
+        out.print(SET_BG_COLOR_WHITE);
+
+        out.print(SET_TEXT_COLOR_WHITE);
+    }
+
+    private static void highlightChessBoardBackward(PrintStream out, ChessBoard board, Collection<ChessMove> validMoves) {
+        ChessPosition start = null;
+        for (var move : validMoves) {
+            start = move.getStartPosition();
+            break;
+        }
+        for (int row = 0; row < 8; row++) {
+            out.print(SET_BG_COLOR_LIGHT_GREY);
+            out.print(" ");
+            out.print(row + 1);
+            out.print(" ");
+            for (int col = 0; col < 8; col++) {
+                ChessPosition endPos = new ChessPosition(row + 1, 8 - col);
+                ChessPiece piece = board.getPiece(endPos);
+                ChessMove move = new ChessMove(start, endPos, null);
+
+                printBackground(out, validMoves, col, row, move);
+
+                printNull(out, piece);
+            }
+            out.print(SET_TEXT_COLOR_BLACK);
+            out.print(SET_BG_COLOR_LIGHT_GREY);
+            out.print(" ");
+            out.print(row + 1);
+            out.print(" ");
+
+            out.print(SET_BG_COLOR_WHITE);
+            out.println();
+        }
+    }
+
+    private static void printBackground(PrintStream out, Collection<ChessMove> validMoves, int col, int row, ChessMove move) {
+        if ((col + row) % 2 == 0) {
+            if (validMoves.contains(move)) {
+                out.print(SET_BG_COLOR_GREEN);
+            } else {
+                out.print(SET_BG_COLOR_WHITE);
+            }
+        } else {
+            if (validMoves.contains(move)) {
+                out.print(SET_BG_COLOR_DARK_GREEN);
+            } else {
+                out.print(SET_BG_COLOR_BLACK);
+            }
+        }
+    }
+
+    private static void highlightChessBoardForward(PrintStream out, ChessBoard board, Collection<ChessMove> validMoves) {
+        ChessPosition start = null;
+        for (var move : validMoves) {
+            start = move.getStartPosition();
+            break;
+        }
+        for (int row = 0; row < 8; row++) {
+            out.print(SET_BG_COLOR_LIGHT_GREY);
+            out.print(" ");
+            out.print(BOARD_SIZE_IN_SQUARES - row);
+            out.print(" ");
+            for (int col = 0; col < 8; col++) {
+                ChessPosition newPos = new ChessPosition(8 - row, col + 1);
+                ChessPiece piece = board.getPiece(newPos);
+                ChessMove move = new ChessMove(start, newPos, null);
+
+                printBackground(out, validMoves, col, row, move);
+
+                printNull(out, piece);
+            }
+            out.print(SET_TEXT_COLOR_BLACK);
+            out.print(SET_BG_COLOR_LIGHT_GREY);
+            out.print(" ");
+            out.print(BOARD_SIZE_IN_SQUARES - row);
+            out.print(" ");
+
+            out.println(SET_BG_COLOR_WHITE);
+        }
+
+    }
+
+    private static void printNull(PrintStream out, ChessPiece piece) {
+        if (piece == null) {
+            out.print(EMPTY.repeat(LINE_WIDTH_IN_CHARS));
+        } else if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
+            out.print(SET_TEXT_COLOR_BLUE);
+            out.print(piece);
+        } else if (piece.getTeamColor() == ChessGame.TeamColor.BLACK) {
+            out.print(SET_TEXT_COLOR_RED);
+            out.print(piece);
+        }
     }
 
     /**
@@ -130,15 +246,7 @@ public class BoardDisplay {
                 }
 
                 ChessPiece piece = board.getPiece(new ChessPosition(8 - row, col + 1));
-                if (piece == null) {
-                    out.print(EMPTY.repeat(LINE_WIDTH_IN_CHARS));
-                } else if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
-                    out.print(SET_TEXT_COLOR_BLUE);
-                    out.print(piece);
-                } else if (piece.getTeamColor() == ChessGame.TeamColor.BLACK) {
-                    out.print(SET_TEXT_COLOR_RED);
-                    out.print(piece);
-                }
+                printNull(out, piece);
             }
             out.print(SET_TEXT_COLOR_BLACK);
             out.print(SET_BG_COLOR_LIGHT_GREY);
@@ -170,15 +278,7 @@ public class BoardDisplay {
                 }
 
                 ChessPiece piece = board.getPiece(new ChessPosition(row + 1, 8 - col));
-                if (piece == null) {
-                    out.print(EMPTY.repeat(LINE_WIDTH_IN_CHARS));
-                } else if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
-                    out.print(SET_TEXT_COLOR_BLUE);
-                    out.print(piece);
-                } else if (piece.getTeamColor() == ChessGame.TeamColor.BLACK) {
-                    out.print(SET_TEXT_COLOR_RED);
-                    out.print(piece);
-                }
+                printNull(out, piece);
             }
             out.print(SET_TEXT_COLOR_BLACK);
             out.print(SET_BG_COLOR_LIGHT_GREY);

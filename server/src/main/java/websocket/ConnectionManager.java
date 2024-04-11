@@ -26,7 +26,6 @@ public class ConnectionManager {
     public void sendMessage(String player, String message) throws IOException {
         var conn = connections.get(player);
         if (conn.session.isOpen()) {
-            System.out.println("Found connection!");
             conn.send(message);
         }
     }

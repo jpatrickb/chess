@@ -7,6 +7,7 @@ import chess.ChessPosition;
 import exception.ResponseException;
 import model.*;
 import server.ServerFacade;
+import webSocketMessages.serverMessages.LoadGameMessage;
 import webSocketMessages.userCommands.MakeMoveCommand;
 import websocket.NotificationHandler;
 import websocket.WebSocketFacade;
@@ -14,6 +15,7 @@ import websocket.WebSocketFacade;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static ui.EscapeSequences.*;
 
@@ -26,7 +28,10 @@ public class Client {
     private final String serverUrl;
     private final NotificationHandler repl;
     private ArrayList<GameResponseData> allGames;
+    private ConcurrentHashMap<Integer, GameData> gameObjects;
     private final WebSocketFacade ws;
+    private GameData game;
+    private ChessGame.TeamColor teamColor;
     private AuthData authData;
 
     /**
@@ -63,11 +68,51 @@ public class Client {
                 case "cleardb" -> clearDataBase();
                 case "quit" -> "quit";
                 case "move" -> makeMove(params);
+                case "redraw" -> redrawBoard();
+                case "highlight" -> highlightMoves(params);
+                case "resign" -> resign();
+                case "leave" -> leave();
                 default -> help();
             };
         } catch (ResponseException e) {
             return e.getMessage();
         }
+    }
+
+    private String leave() throws ResponseException {
+        if (state != State.IN_GAME) {
+            throw new ResponseException(400, "Only available in game");
+        }
+        ws.leave(authData.authToken(), game.gameID());
+        state = State.LOGGED_IN;
+        return "";
+    }
+
+    private String resign() throws ResponseException {
+        if (state != State.IN_GAME) {
+            throw new ResponseException(400, "Only available in game");
+        }
+        ws.resign(authData.authToken(), game.gameID());
+        state = State.RESIGNED;
+        return "";
+    }
+
+    private String highlightMoves(String[] params) throws ResponseException {
+        if (state != State.IN_GAME) {
+            throw new ResponseException(400, "Only available in game");
+        }
+        var startPos = parsePosition(params[0]);
+        updateGames();
+        BoardDisplay.highlight(game.game(), teamColor, startPos);
+        return "";
+    }
+
+    private String redrawBoard() throws ResponseException {
+        if (state != State.IN_GAME) {
+            throw new ResponseException(400, "Only available in game");
+        }
+        ws.getGame(authData.authToken(), game.gameID());
+        return "";
     }
 
     private String makeMove(String[] params) throws ResponseException {
@@ -82,7 +127,7 @@ public class Client {
         }
 
         ChessMove move = new ChessMove(startPosition, endPosition, promotionPiece);
-//        ws.makeMove(authData.authToken(), );
+        ws.makeMove(authData.authToken(), game.gameID(), move);
 
         return "";
     }
@@ -113,6 +158,12 @@ public class Client {
         if (state == State.LOGGED_OUT) {
             commands = new String[]{"register <USERNAME> <PASSWORD> <EMAIL>", "login <USERNAME> <PASSWORD>", "quit", "help"};
             description = new String[]{"create an account", "login and play", "stop playing", "list possible commands"};
+        } else if (state == State.IN_GAME) {
+            commands = new String[]{"redraw", "move <START> <END> [<PIECE>|<empty>]", "highlight <START>", "resign", "leave", "help"};
+            description = new String[]{"redraws chess board", "moves a piece from the <START> position to <END> with <PIECE> as pawn promotion", "highlights legal moves from <START>", "resigns the game", "leaves the game", "provides help information"};
+        } else if (state == State.RESIGNED) {
+            commands = new String[]{"redraw", "leave", "help"};
+            description = new String[]{"redraws chess board", "leaves the game", "provides help information"};
         }
         StringBuilder response = new StringBuilder();
         for (int i = 0; i < commands.length; i++) {
@@ -140,20 +191,22 @@ public class Client {
         try {
             updateGames();
             int idx = Integer.parseInt(params[0]);
-            var game = allGames.get(idx - 1);
+            int gameID = allGames.get(idx - 1).gameID();
+            game = gameObjects.get(gameID);
 
             ChessGame.TeamColor color = parseColor(params.length == 2 ? params[1].toLowerCase() : null);
             if (color == null) {
                 return "Invalid color.";
             }
 
-            if (game.isOccupied(color)) {
+            if (allGames.get(idx - 1).isOccupied(color)) {
                 return String.format("Can't join as %s", color.name().toLowerCase());
             }
 
             server.joinGame(new JoinRequest(game.gameID(), color));
             ws.joinPlayer(authData.authToken(), game.gameID(), color);
-//            BoardDisplay.main(new ChessGame(), color);
+            state = State.IN_GAME;
+            teamColor = color;
             return "";
         } catch (IndexOutOfBoundsException e) {
             return "Requested game doesn't exist";
@@ -298,6 +351,7 @@ public class Client {
     private void updateGames() {
         try {
             var newGames = server.listGames();
+            gameObjects = server.getGameObjects();
             ArrayList<GameResponseData> tempGames = new ArrayList<>();
 
             if (allGames != null) {
@@ -325,6 +379,10 @@ public class Client {
                 tempGames = newGames;
             }
             allGames = tempGames;
+
+            if (game != null) {
+                game = gameObjects.get(game.gameID());
+            }
         } catch (ResponseException e) {
             System.out.println(e.getMessage());
         }
