@@ -54,4 +54,8 @@ public class GameService {
     public GameData getGame(Integer gameID) throws DataAccessException {
         return gameDAO.getGame(gameID);
     }
+
+    public void updateGame(GameData game) throws DataAccessException {
+        gameDAO.updateGame(game);
+    }
 }

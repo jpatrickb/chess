@@ -3,10 +3,12 @@ package websocket;
 import Service.GameService;
 import Service.LoginService;
 import chess.ChessGame;
+import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import dataAccess.DataAccessException;
+import exception.ResponseException;
 import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
@@ -52,22 +54,60 @@ public class WebSocketHandler {
         }
     }
 
-    private void resignGame(ResignCommand resignCommand) {
+    private void resignGame(ResignCommand command) throws DataAccessException, IOException, ResponseException {
+        String username = loginService.getUser(command.getAuthString());
+        var gameData = this.gameService.getGame(command.getGameID());
 
+        if (!Objects.equals(gameData.whiteUsername(), username) && !Objects.equals(gameData.blackUsername(), username)) {
+            throw new ResponseException(401, "Can't resign as an observer");
+        }
+        if (gameData.game().getTeamTurn() == ChessGame.TeamColor.NONE) {
+            throw new ResponseException(400, "Already resigned");
+        }
+
+        gameData.game().setTeamTurn(ChessGame.TeamColor.NONE);
+        gameService.updateGame(gameData);
+
+        var message = new NotificationMessage(String.format("Player %s%n has resigned the game.", username));
+        connections.broadcast(null, new Gson().toJson(message));
     }
 
-    private void leaveGame(LeaveCommand leaveCommand) {
-
+    private void leaveGame(LeaveCommand leaveCommand) throws DataAccessException, IOException {
+        String username = loginService.getUser(leaveCommand.getAuthString());
+        connections.remove(username);
+        var notification = new NotificationMessage(String.format("Player %s%n has left the game.", username));
+        connections.broadcast(username, new Gson().toJson(notification));
     }
 
-    private void makeMove(MakeMoveCommand command) {
+    private void makeMove(MakeMoveCommand command) throws DataAccessException, InvalidMoveException, IOException, ResponseException {
+        String username = loginService.getUser(command.getAuthString());
+        var gameData = this.gameService.getGame(command.getGameID());
+        ChessGame.TeamColor color = gameData.game().getTeamTurn();
+        String turn = switch (color) {
+            case WHITE -> gameData.whiteUsername();
+            case BLACK -> gameData.blackUsername();
+            case NONE -> null;
+        };
 
+        if (!Objects.equals(turn, username)) {
+            throw new ResponseException(400, "Not your turn");
+        }
+
+        gameData.game().makeMove(command.getMove());
+        this.gameService.updateGame(gameData);
+
+        connections.broadcastGame(new LoadGameMessage(gameData));
+        var notification = new NotificationMessage("Move " + command.getMove().toString() + " made by " + username);
+        connections.broadcast(username, new Gson().toJson(notification));
     }
 
-    private void joinObserver(JoinObserverCommand command, Session session) throws DataAccessException, IOException {
+    private void joinObserver(JoinObserverCommand command, Session session) throws DataAccessException, IOException, ResponseException {
         String username = loginService.getUser(command.getAuthString());
         connections.add(username, session);
         var gameData = this.gameService.getGame(command.getGameID());
+        if (gameData == null) {
+            throw new ResponseException(400, "Invalid game id");
+        }
 
         var text = String.format("Player %s%n has joined as observer", username);
         var notification = new NotificationMessage(text);
@@ -91,7 +131,8 @@ public class WebSocketHandler {
     }
 
     public void sendGame(GameData game, ChessGame.TeamColor color, String player) throws IOException {
-        var message = new LoadGameMessage(game.game(), color);
+        var message = new LoadGameMessage(game);
+        message.setColor(color);
         connections.sendMessage(player, new Gson().toJson(message));
     }
 

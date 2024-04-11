@@ -1,12 +1,14 @@
 package websocket;
 
 
+import chess.ChessGame;
+import com.google.gson.Gson;
 import org.eclipse.jetty.websocket.api.Session;
-import server.Server;
-import webSocketMessages.serverMessages.ServerMessage;
+import webSocketMessages.serverMessages.LoadGameMessage;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ConnectionManager {
@@ -26,6 +28,27 @@ public class ConnectionManager {
         if (conn.session.isOpen()) {
             System.out.println("Found connection!");
             conn.send(message);
+        }
+    }
+
+    public void broadcastGame(LoadGameMessage gameMessage) throws IOException {
+        var removeList = new ArrayList<Connection>();
+
+        for (var c : connections.values()) {
+            if (c.session.isOpen()) {
+                if (Objects.equals(c.userName, gameMessage.getGame().blackUsername())) {
+                    gameMessage.setColor(ChessGame.TeamColor.BLACK);
+                } else {
+                    gameMessage.setColor(ChessGame.TeamColor.WHITE);
+                }
+                c.send(new Gson().toJson(gameMessage));
+            } else {
+                removeList.add(c);
+            }
+        }
+
+        for (var c : removeList) {
+            connections.remove(c.userName);
         }
     }
 

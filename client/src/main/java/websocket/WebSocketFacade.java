@@ -1,6 +1,7 @@
 package websocket;
 
 import chess.ChessGame;
+import chess.ChessMove;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -55,6 +56,15 @@ public class WebSocketFacade extends Endpoint {
     public void joinPlayer(String authToken, int gameID, ChessGame.TeamColor color) throws ResponseException {
         try {
             var command = new JoinPlayerCommand(authToken, gameID, color);
+            send(new Gson().toJson(command));
+        } catch (IOException e) {
+            throw new ResponseException(500, e.getMessage());
+        }
+    }
+
+    public void makeMove(String authToken, int gameID, ChessMove move) throws ResponseException {
+        try {
+            var command = new MakeMoveCommand(authToken, gameID, move);
             send(new Gson().toJson(command));
         } catch (IOException e) {
             throw new ResponseException(500, e.getMessage());

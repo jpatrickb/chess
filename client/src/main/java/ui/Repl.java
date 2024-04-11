@@ -69,7 +69,7 @@ public class Repl implements NotificationHandler {
     public void loadGame(LoadGameMessage message) {
         var game = message.getGame();
         var color = message.getColor();
-        BoardDisplay.main(game, color);
+        BoardDisplay.main(game.game(), color);
         printPrompt();
     }
 

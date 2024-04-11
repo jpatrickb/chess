@@ -1,9 +1,13 @@
 package ui;
 
 import chess.ChessGame;
+import chess.ChessMove;
+import chess.ChessPiece;
+import chess.ChessPosition;
 import exception.ResponseException;
 import model.*;
 import server.ServerFacade;
+import webSocketMessages.userCommands.MakeMoveCommand;
 import websocket.NotificationHandler;
 import websocket.WebSocketFacade;
 
@@ -58,11 +62,38 @@ public class Client {
                 case "join", "observe" -> joinGame(params);
                 case "cleardb" -> clearDataBase();
                 case "quit" -> "quit";
+                case "move" -> makeMove(params);
                 default -> help();
             };
         } catch (ResponseException e) {
             return e.getMessage();
         }
+    }
+
+    private String makeMove(String[] params) throws ResponseException {
+        var start = params[0];
+        var end = params[1];
+        ChessPosition startPosition = parsePosition(start.toLowerCase());
+        ChessPosition endPosition = parsePosition(end.toLowerCase());
+
+        ChessPiece.PieceType promotionPiece = null;
+        if (params.length == 3) {
+            promotionPiece = ChessPiece.PieceType.valueOf(params[2].toUpperCase());
+        }
+
+        ChessMove move = new ChessMove(startPosition, endPosition, promotionPiece);
+//        ws.makeMove(authData.authToken(), );
+
+        return "";
+    }
+
+    private ChessPosition parsePosition(String pos) throws ResponseException {
+        if (pos.length() != 2) {
+            throw new ResponseException(400, "Invalid position: " + pos);
+        }
+        var col = pos.charAt(0) - 96;
+        var row = pos.charAt(1) - 48;
+        return new ChessPosition(row, col);
     }
 
     /**

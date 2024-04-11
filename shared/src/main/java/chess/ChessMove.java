@@ -12,6 +12,8 @@ public class ChessMove {
     private ChessPosition start;
     private ChessPosition end;
     private ChessPiece.PieceType promotionPiece;
+    private final String[] COLS = {"a", "b", "c", "d", "e", "f", "g", "h"};
+
 
     public ChessMove(ChessPosition startPosition, ChessPosition endPosition,
                      ChessPiece.PieceType promotionPiece) {
@@ -42,6 +44,15 @@ public class ChessMove {
      */
     public ChessPiece.PieceType getPromotionPiece() {
         return this.promotionPiece;
+    }
+
+    private String parsePosition(ChessPosition pos) {
+        return COLS[pos.getColumn() - 1] + (9 - pos.getRow());
+    }
+
+    @Override
+    public String toString() {
+        return parsePosition(getStartPosition()) + " " + parsePosition(getEndPosition());
     }
 
     @Override
