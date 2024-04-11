@@ -9,10 +9,10 @@ import java.util.Objects;
  * signature of the existing methods.
  */
 public class ChessMove {
-    private ChessPosition start;
-    private ChessPosition end;
-    private ChessPiece.PieceType promotionPiece;
-    private final String[] COLS = {"a", "b", "c", "d", "e", "f", "g", "h"};
+    private final ChessPosition start;
+    private final ChessPosition end;
+    private final ChessPiece.PieceType promotionPiece;
+    private static final String[] COLS = {"a", "b", "c", "d", "e", "f", "g", "h"};
 
 
     public ChessMove(ChessPosition startPosition, ChessPosition endPosition,

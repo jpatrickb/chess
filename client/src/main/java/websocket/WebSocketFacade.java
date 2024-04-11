@@ -34,13 +34,9 @@ public class WebSocketFacade extends Endpoint {
                     JsonObject obj = JsonParser.parseString(s).getAsJsonObject();
                     ServerMessage.ServerMessageType type = ServerMessage.ServerMessageType.valueOf(obj.get("serverMessageType").getAsString());
                     switch (type) {
-                        case LOAD_GAME -> {
-                            notificationHandler.loadGame(new Gson().fromJson(s, LoadGameMessage.class));
-                        }
-                        case ERROR -> {
-                        }
-                        case NOTIFICATION -> {
-                        }
+                        case LOAD_GAME -> notificationHandler.loadGame(new Gson().fromJson(s, LoadGameMessage.class));
+                        case ERROR -> notificationHandler.error(new Gson().fromJson(s, ErrorMessage.class));
+                        case NOTIFICATION -> notificationHandler.notify(new Gson().fromJson(s, NotificationMessage.class));
                     }
                 }
             });

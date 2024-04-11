@@ -122,11 +122,6 @@ public class BoardDisplay {
             out.print(" ");
             out.print(BOARD_SIZE_IN_SQUARES - row);
             out.print(" ");
-//            if (row < 2) {
-//                out.print(SET_TEXT_COLOR_RED);
-//            } else {
-//                out.print(SET_TEXT_COLOR_BLUE);
-//            }
             for (int col = 0; col < 8; col++) {
                 if ((col + row) % 2 == 0) {
                     out.print(SET_BG_COLOR_WHITE);
@@ -144,17 +139,6 @@ public class BoardDisplay {
                     out.print(SET_TEXT_COLOR_RED);
                     out.print(piece);
                 }
-//                if (row == 0) {
-//                    out.print(BLACK_PIECES[col]);
-//                } else if (row == 1) {
-//                    out.print(BLACK_PAWN);
-//                } else if (row == 6) {
-//                    out.print(WHITE_PAWN);
-//                } else if (row == 7) {
-//                    out.print(WHITE_PIECES[col]);
-//                } else {
-//                    out.print(EMPTY.repeat(LINE_WIDTH_IN_CHARS));
-//                }
             }
             out.print(SET_TEXT_COLOR_BLACK);
             out.print(SET_BG_COLOR_LIGHT_GREY);
@@ -178,11 +162,6 @@ public class BoardDisplay {
             out.print(" ");
             out.print(row + 1);
             out.print(" ");
-//            if (row < 2) {
-//                out.print(SET_TEXT_COLOR_BLUE);
-//            } else {
-//                out.print(SET_TEXT_COLOR_RED);
-//            }
             for (int col = 0; col < 8; col++) {
                 if ((col + row) % 2 == 0) {
                     out.print(SET_BG_COLOR_WHITE);
@@ -200,17 +179,6 @@ public class BoardDisplay {
                     out.print(SET_TEXT_COLOR_RED);
                     out.print(piece);
                 }
-//                if (row == 0) {
-//                    out.print(WHITE_PIECES[BOARD_SIZE_IN_SQUARES - col - 1]);
-//                } else if (row == 1) {
-//                    out.print(WHITE_PAWN);
-//                } else if (row == 6) {
-//                    out.print(BLACK_PAWN);
-//                } else if (row == 7) {
-//                    out.print(BLACK_PIECES[BOARD_SIZE_IN_SQUARES - col - 1]);
-//                } else {
-//                    out.print(EMPTY.repeat(LINE_WIDTH_IN_CHARS));
-//                }
             }
             out.print(SET_TEXT_COLOR_BLACK);
             out.print(SET_BG_COLOR_LIGHT_GREY);
