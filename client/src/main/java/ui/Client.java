@@ -80,7 +80,7 @@ public class Client {
     }
 
     private String leave() throws ResponseException {
-        if (state != State.IN_GAME) {
+        if (state != State.IN_GAME && state != State.RESIGNED) {
             throw new ResponseException(400, "Only available in game");
         }
         ws.leave(authData.authToken(), game.gameID());
@@ -116,6 +116,9 @@ public class Client {
     }
 
     private String makeMove(String[] params) throws ResponseException {
+        if (params.length < 2) {
+            throw new ResponseException(400, "Invalid move");
+        }
         var start = params[0];
         var end = params[1];
         ChessPosition startPosition = parsePosition(start.toLowerCase());

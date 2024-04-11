@@ -94,7 +94,7 @@ public class WebSocketHandler {
         String turn = switch (color) {
             case WHITE -> gameData.whiteUsername();
             case BLACK -> gameData.blackUsername();
-            case NONE -> null;
+            case NONE -> throw new InvalidMoveException("Game is over, can't make moves");
         };
 
         if (!Objects.equals(turn, username)) {

@@ -135,15 +135,17 @@ public class ChessGame {
             } else {
                 this.setTeamTurn(TeamColor.WHITE);
             }
-            if (isInCheck(getTeamTurn())) {
-                throw new InvalidMoveException("Check!");
-            }
 
             if (isInCheckmate(getTeamTurn())) {
+                setTeamTurn(TeamColor.NONE);
                 throw new InvalidMoveException("Checkmate!");
             }
             if (isInStalemate(getTeamTurn())) {
+                setTeamTurn(TeamColor.NONE);
                 throw new InvalidMoveException("Stalemate!");
+            }
+            if (isInCheck(getTeamTurn())) {
+                throw new InvalidMoveException("Check!");
             }
         }
     }
